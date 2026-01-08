@@ -18,18 +18,6 @@ target/
 ### Mac OS ###
 .DS_Store
 
-# ======================
-# Vue3 / Node.js / VSCode
-# ======================
-node_modules/
-dist/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-pnpm-lock.yaml
-yarn.lock
-
 #Confuguration file
-*.yml
+**/application-dev.yml
 *.yaml
