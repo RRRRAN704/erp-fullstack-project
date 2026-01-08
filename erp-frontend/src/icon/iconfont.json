@@ -1,0 +1,114 @@
+{
+  "id": "4977012",
+  "name": "erp-project",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "58333",
+      "name": "add",
+      "font_class": "add",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "109739",
+      "name": "file",
+      "font_class": "file",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "880336",
+      "name": "search",
+      "font_class": "search",
+      "unicode": "e6b9",
+      "unicode_decimal": 59065
+    },
+    {
+      "icon_id": "880404",
+      "name": "user",
+      "font_class": "user",
+      "unicode": "e6bc",
+      "unicode_decimal": 59068
+    },
+    {
+      "icon_id": "2357626",
+      "name": "code",
+      "font_class": "code",
+      "unicode": "e842",
+      "unicode_decimal": 59458
+    },
+    {
+      "icon_id": "3029227",
+      "name": "project",
+      "font_class": "project-copy",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "5874106",
+      "name": "password",
+      "font_class": "password",
+      "unicode": "e675",
+      "unicode_decimal": 58997
+    },
+    {
+      "icon_id": "6151033",
+      "name": "chart-area",
+      "font_class": "chart-area",
+      "unicode": "e78f",
+      "unicode_decimal": 59279
+    },
+    {
+      "icon_id": "6151253",
+      "name": "file",
+      "font_class": "file1",
+      "unicode": "e809",
+      "unicode_decimal": 59401
+    },
+    {
+      "icon_id": "6360853",
+      "name": "edit",
+      "font_class": "edit",
+      "unicode": "e677",
+      "unicode_decimal": 58999
+    },
+    {
+      "icon_id": "6652232",
+      "name": "department",
+      "font_class": "department",
+      "unicode": "e6ba",
+      "unicode_decimal": 59066
+    },
+    {
+      "icon_id": "6807240",
+      "name": "Tie",
+      "font_class": "Tie",
+      "unicode": "ebf5",
+      "unicode_decimal": 60405
+    },
+    {
+      "icon_id": "11981534",
+      "name": "delete",
+      "font_class": "delete",
+      "unicode": "e94d",
+      "unicode_decimal": 59725
+    },
+    {
+      "icon_id": "19418322",
+      "name": "archive",
+      "font_class": "archive",
+      "unicode": "e714",
+      "unicode_decimal": 59156
+    },
+    {
+      "icon_id": "34452812",
+      "name": "customer-center",
+      "font_class": "customer-center",
+      "unicode": "e827",
+      "unicode_decimal": 59431
+    }
+  ]
+}
