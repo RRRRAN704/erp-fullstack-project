@@ -66,8 +66,8 @@ logging:
 
 erp:
   jwt:
-    # secret key for jwt generation
-    admin-secret-key: adminkey
+    # secret key for jwt generation (set erp.jwt.secret in application-dev.yml or the ERP_JWT_SECRET env var)
+    admin-secret-key: ${erp.jwt.secret}
     # jwt expiry time
     admin-ttl: 7200000
     # front-end passed token name
