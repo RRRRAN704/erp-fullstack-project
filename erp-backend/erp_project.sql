@@ -163,7 +163,7 @@ CREATE TABLE `employee` (
 
 LOCK TABLES `employee` WRITE;
 /*!40000 ALTER TABLE `employee` DISABLE KEYS */;
-INSERT INTO `employee` VALUES (1,'admin','admin',1,1,'e10adc3949ba59abbe56e057f20f883e','07123456789','1',1,'2022-02-15 15:51:20','2025-08-07 17:51:07',1,1,'candiceran@126.com'),(2,'Yiran Wang','yrwang',3,2,'e10adc3949ba59abbe56e057f20f883e','07234567890','2',1,'2025-07-09 19:45:51','2025-08-31 16:14:26',1,1,'candiceran808@gmail.com'),(3,'Manager','manager',2,2,'e10adc3949ba59abbe56e057f20f883e','07345678901','2',1,'2025-07-10 21:52:46','2025-08-25 22:31:53',1,1,'marywyr@qq.com'),(6,'Adam Smith','adam',3,2,'e10adc3949ba59abbe56e057f20f883e','07456789012','1',1,'2025-08-29 13:17:11','2025-08-31 16:09:19',1,1,'123456@gmail.com');
+INSERT INTO `employee` VALUES (1,'admin','admin',1,1,'$2a$10$BZL9T1UHZ3Dx7xW8jel8LOLiR5agAtKSzGa84GPGnHNLPIP.lz1FO','07123456789','1',1,'2022-02-15 15:51:20','2025-08-07 17:51:07',1,1,'admin@example.com'),(2,'Yiran Wang','yrwang',3,2,'$2a$10$BZL9T1UHZ3Dx7xW8jel8LOLiR5agAtKSzGa84GPGnHNLPIP.lz1FO','07234567890','2',1,'2025-07-09 19:45:51','2025-08-31 16:14:26',1,1,'yrwang@example.com'),(3,'Manager','manager',2,2,'$2a$10$BZL9T1UHZ3Dx7xW8jel8LOLiR5agAtKSzGa84GPGnHNLPIP.lz1FO','07345678901','2',1,'2025-07-10 21:52:46','2025-08-25 22:31:53',1,1,'manager@example.com'),(6,'Adam Smith','adam',3,2,'$2a$10$BZL9T1UHZ3Dx7xW8jel8LOLiR5agAtKSzGa84GPGnHNLPIP.lz1FO','07456789012','1',1,'2025-08-29 13:17:11','2025-08-31 16:09:19',1,1,'adam@example.com');
 /*!40000 ALTER TABLE `employee` ENABLE KEYS */;
 UNLOCK TABLES;
 
