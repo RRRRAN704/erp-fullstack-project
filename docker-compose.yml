@@ -1,0 +1,114 @@
+# Local full stack, built from source:   docker compose up --build
+#   website:  http://localhost:8080
+#   ERP:      http://localhost:8081   (admin / 123456, seeded from erp-backend/erp_project.sql)
+#
+# Mirrors deploy/docker-compose.prod.yml (same images, memory limits and settings) with dev-only passwords.
+# Email, file upload and the AI assistant need real credentials: put them in a git-ignored .env next to
+# this file using the names in deploy/.env.example. Without them those three features fail; the rest works.
+# To reset the database to the seed data:   docker compose down -v
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: erp_project
+      MYSQL_USER: erp
+      MYSQL_PASSWORD: erp-dev-password
+      MYSQL_ROOT_PASSWORD: root-dev-password
+      TZ: Europe/London
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --performance-schema=OFF
+      - --max-connections=30
+      - --table-open-cache=200
+      - --tmp-table-size=16M
+      - --max-heap-table-size=16M
+      - --skip-name-resolve
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./erp-backend/erp_project.sql:/docker-entrypoint-initdb.d/01-erp_project.sql:ro
+    mem_limit: 320m
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    logging: *logging
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "redis-dev-password",
+              "--maxmemory", "32mb", "--maxmemory-policy", "allkeys-lru"]
+    environment:
+      REDISCLI_AUTH: redis-dev-password
+    mem_limit: 48m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  backend:
+    build: ./erp-backend
+    image: erp-backend:local
+    environment:
+      TZ: Europe/London
+      ERP_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      ERP_DATASOURCE_HOST: mysql
+      ERP_DATASOURCE_PORT: "3306"
+      ERP_DATASOURCE_DATABASE: erp_project
+      ERP_DATASOURCE_USERNAME: erp
+      ERP_DATASOURCE_PASSWORD: erp-dev-password
+      ERP_REDIS_HOST: redis
+      ERP_REDIS_PORT: "6379"
+      ERP_REDIS_PASSWORD: redis-dev-password
+      ERP_JWT_SECRET: local-dev-only-jwt-secret-not-for-production
+      ERP_MAIL_HOST: ${MAIL_HOST:-localhost}
+      ERP_MAIL_PORT: ${MAIL_PORT:-587}
+      ERP_MAIL_USERNAME: ${MAIL_USERNAME:-}
+      ERP_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      ERP_MAIL_FROM_EMAIL: ${MAIL_FROM_EMAIL:-noreply@example.com}
+      ERP_ALIOSS_ENDPOINT: ${OSS_ENDPOINT:-}
+      ERP_ALIOSS_ACCESS_KEY_ID: ${OSS_ACCESS_KEY_ID:-}
+      ERP_ALIOSS_ACCESS_KEY_SECRET: ${OSS_ACCESS_KEY_SECRET:-}
+      ERP_ALIOSS_BUCKET_NAME: ${OSS_BUCKET_NAME:-}
+      ERP_LLM_BASE_URL: ${LLM_BASE_URL:-}
+      ERP_LLM_MODEL: ${LLM_MODEL:-}
+      ERP_LLM_API_KEY: ${LLM_API_KEY:-}
+    mem_limit: 448m
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8091/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 90s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    logging: *logging
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web/Dockerfile
+    image: erp-web:local
+    ports:
+      - "8080:8080"   # website
+      - "8081:8081"   # ERP
+    mem_limit: 64m
+    depends_on:
+      - backend
+    logging: *logging
+
+volumes:
+  mysql_data:
