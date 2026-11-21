@@ -56,6 +56,21 @@ mybatis:
     # camel naming
     map-underscore-to-camel-case: true
 
+management:
+  # separate port: keeps actuator out of springfox's scan (it fails on Boot 2.6+)
+  # and keeps health checks off the public proxy
+  server:
+    port: 8091
+  endpoints:
+    web:
+      exposure:
+        # expose only /actuator/health over HTTP
+        include: health
+  health:
+    # an SMTP outage should not mark the app as down and trigger a rollback
+    mail:
+      enabled: false
+
 logging:
   level:
     com:
