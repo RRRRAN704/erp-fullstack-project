@@ -1,0 +1,11 @@
+# Keep the build context small and, above all, keep local secrets out of the image.
+**/application-dev.yml
+**/application-*.yml
+!**/application.yml
+**/target/
+erp_project.sql
+.idea/
+.vscode/
+**/*.iml
+**/*.log
+.DS_Store
