@@ -1,0 +1,36 @@
+# Two sites, chosen by hostname. Each serves its own frontend and shares the same API.
+#
+# SITE_ADDRESS / ERP_ADDRESS come from the environment:
+#   production: SITE_ADDRESS="flowbiterp.site, www.flowbiterp.site"  ERP_ADDRESS="erp.flowbiterp.site"
+#               (real hostnames -> Caddy gets and renews Let's Encrypt certificates and redirects HTTP to HTTPS)
+#   local:      unset -> plain HTTP on :8080 (website) and :8081 (ERP)
+
+(app) {
+	encode zstd gzip
+
+	# /api/employee/list -> backend /employee/list (handle_path strips the /api prefix),
+	# the same rule the Vite dev proxy uses, so the frontends need no changes.
+	handle_path /api/* {
+		reverse_proxy backend:8090
+	}
+
+	# Vue Router uses history mode: unknown paths such as /admin/employee
+	# must return index.html so the router can handle them after a page refresh.
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Vite puts a content hash in every asset file name, so these can be cached forever.
+	header /assets/* Cache-Control "public, max-age=31536000, immutable"
+}
+
+{$SITE_ADDRESS::8080} {
+	root * /srv/site
+	import app
+}
+
+{$ERP_ADDRESS::8081} {
+	root * /srv/erp
+	import app
+}

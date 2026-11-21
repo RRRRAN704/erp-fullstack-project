@@ -1,0 +1,12 @@
+# Build context for deploy/web/Dockerfile (repository root).
+# Only the two frontends and the Caddyfile are needed; keep everything else out.
+**/node_modules/
+**/dist/
+**/.env.local
+**/.env.*.local
+.git/
+erp-backend/
+docs/
+.idea/
+.vscode/
+**/.DS_Store
