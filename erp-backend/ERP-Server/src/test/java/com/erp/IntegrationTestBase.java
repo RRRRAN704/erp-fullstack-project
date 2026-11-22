@@ -1,15 +1,23 @@
 package com.erp;
 
+import com.jayway.jsonpath.JsonPath;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Paths;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Base class for integration tests: the whole Spring app against a real MySQL (seeded with erp_project.sql)
@@ -47,5 +55,22 @@ public abstract class IntegrationTestBase {
         registry.add("erp.redis.host", REDIS::getHost);
         registry.add("erp.redis.port", () -> REDIS.getMappedPort(6379));
         registry.add("erp.redis.password", () -> "");
+    }
+
+    /** Password of every seeded employee (admin, manager, yrwang, adam). */
+    protected static final String SEED_PASSWORD = "123456";
+
+    @Autowired
+    protected MockMvc mockMvc;
+
+    /** Logs in through the real endpoint and returns the JWT to send in the "token" header. */
+    protected String loginAs(String username) throws Exception {
+        String body = mockMvc.perform(post("/employee/info/login")
+                        .contentType(APPLICATION_JSON)
+                        .content("{\"username\":\"" + username + "\",\"password\":\"" + SEED_PASSWORD + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1))
+                .andReturn().getResponse().getContentAsString();
+        return JsonPath.read(body, "$.data.token");
     }
 }
