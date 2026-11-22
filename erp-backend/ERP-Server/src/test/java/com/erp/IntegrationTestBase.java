@@ -1,5 +1,6 @@
 package com.erp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -62,6 +63,22 @@ public abstract class IntegrationTestBase {
 
     @Autowired
     protected MockMvc mockMvc;
+
+    private static final ObjectMapper JSON = new ObjectMapper();
+
+    /** Seed employees used by the business tests (see erp_project.sql). */
+    protected static final long YRWANG_ID = 2;     // Consultant, department 2
+    protected static final long DEPARTMENT_2 = 2;
+
+    /** Serialises a request body (e.g. a Map) to JSON. */
+    protected static String json(Object body) throws Exception {
+        return JSON.writeValueAsString(body);
+    }
+
+    /** A name no other test (or earlier run against the same data) uses, so searches find exactly one row. */
+    protected static String unique(String prefix) {
+        return prefix + " " + java.util.UUID.randomUUID().toString().substring(0, 8);
+    }
 
     /** Logs in through the real endpoint and returns the JWT to send in the "token" header. */
     protected String loginAs(String username) throws Exception {
