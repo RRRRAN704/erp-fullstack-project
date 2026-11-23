@@ -60,21 +60,6 @@ const doLogin = () => {
 
 <template>
   <div class="login">
-    <div class="test-accounts-info">
-      <h3>Test Accounts</h3>
-      <div class="account-item">
-        <span class="account-type">System Admin：</span>
-        <span class="account-details">admin / 123456</span>
-      </div>
-      <div class="account-item">
-        <span class="account-type">Manager：</span>
-        <span class="account-details">manager / 123456</span>
-      </div>
-      <div class="account-item">
-        <span class="account-type">Consultant：</span>
-        <span class="account-details">yrwang / 123456</span>
-      </div>
-    </div>
 
     <div class="login-box">
       <img src="@/assets/login/Login.jpg" alt="" />
@@ -119,47 +104,6 @@ const doLogin = () => {
   background-color: #333;
 }
 
-.test-accounts-info {
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  
-  h3 {
-    margin: 0 0 15px 0;
-    color: #002b5b;
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-    border-bottom: 2px solid #002b5b;
-    padding-bottom: 8px;
-  }
-  
-  .account-item {
-    margin-bottom: 8px;
-    font-size: 14px;
-    
-    .account-type {
-      color: #666;
-      font-weight: 500;
-      min-width: 80px;
-      display: inline-block;
-    }
-    
-    .account-details {
-      color: #002b5b;
-      font-family: 'Courier New', monospace;
-      font-weight: 600;
-      background: #f5f5f5;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-  }
-}
 .login-box {
   width: 60%;
   height: 60%;
