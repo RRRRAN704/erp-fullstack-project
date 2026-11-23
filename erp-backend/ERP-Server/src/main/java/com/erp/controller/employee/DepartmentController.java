@@ -11,8 +11,8 @@ import com.erp.result.Result;
 import com.erp.service.DepartmentService;
 import com.erp.service.EmployeeService;
 import com.github.pagehelper.Page;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/employee/department")
 @Slf4j
-@Api(tags = "Department related api")
+@Tag(name = "Department related api")
 public class DepartmentController {
 
     @Autowired
@@ -36,7 +36,7 @@ public class DepartmentController {
      * @return
      */
     @PostMapping
-    @ApiOperation("Add new department")
+    @Operation(summary = "Add new department")
     public Result saveDepartment(@RequestBody DepartmentDTO departmentDTO) {
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -55,7 +55,7 @@ public class DepartmentController {
      * @return
      */
     @GetMapping("/page")
-    @ApiOperation("department page query")
+    @Operation(summary = "department page query")
     public Result<PageResult> pageDepartment(DepartmentPageQueryDTO departmentPageQueryDTO){
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -72,7 +72,7 @@ public class DepartmentController {
      * @return
      */
     @PutMapping
-    @ApiOperation("Edit department info")
+    @Operation(summary = "Edit department info")
     public Result updateDepartment(@RequestBody DepartmentDTO departmentDTO) {
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -90,7 +90,7 @@ public class DepartmentController {
      * @return
      */
     @DeleteMapping
-    @ApiOperation("Delete department in batch")
+    @Operation(summary = "Delete department in batch")
     public Result deleteDepartment(@RequestParam List<Long> ids){
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);

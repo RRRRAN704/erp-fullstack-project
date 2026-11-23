@@ -1,7 +1,6 @@
 package com.erp.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,25 +12,25 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "Login result object that will be sent to the front end ")
+@Schema(description = "Login result object that will be sent to the front end ")
 public class EmployeeLoginVO implements Serializable {
 
-    @ApiModelProperty("Employee Id")
+    @Schema(description = "Employee Id")
     private Long id;
 
-    @ApiModelProperty("username")
+    @Schema(description = "username")
     private String username;
 
-    @ApiModelProperty("fullname")
+    @Schema(description = "fullname")
     private String name;
 
-    @ApiModelProperty("jwt token")
+    @Schema(description = "jwt token")
     private String token;
 
-    @ApiModelProperty("employee role")
+    @Schema(description = "employee role")
     private String position;
 
-    @ApiModelProperty("department Id")
+    @Schema(description = "department Id")
     private Long departmentId;
 
 }

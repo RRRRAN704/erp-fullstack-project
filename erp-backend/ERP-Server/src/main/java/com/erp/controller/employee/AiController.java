@@ -3,7 +3,7 @@ package com.erp.controller.employee;
 
 import com.erp.ai.AiRouterService;
 import com.erp.result.Result;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/ai")
 @RequiredArgsConstructor
-@Api(tags = "AI related controller")
+@Tag(name = "AI related controller")
 @Slf4j
 public class AiController {
 

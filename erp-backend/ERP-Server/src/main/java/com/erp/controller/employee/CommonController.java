@@ -6,8 +6,8 @@ import com.erp.result.Result;
 import com.erp.service.*;
 import com.erp.utils.AliOssUtil;
 import com.erp.vo.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/employee/common")
-@Api(tags = "Common Api")
+@Tag(name = "Common Api")
 @Slf4j
 public class CommonController {
 
@@ -53,7 +53,7 @@ public class CommonController {
      * @return
      */
     @PostMapping("/upload")
-    @ApiOperation("File upload")
+    @Operation(summary = "File upload")
     public Result<String> upload(MultipartFile file) {
         log.info("File upload:{}", file);
         try {
@@ -84,7 +84,7 @@ public class CommonController {
      * @return
      */
     @GetMapping("/employee")
-    @ApiOperation("Get employee mapping details")
+    @Operation(summary = "Get employee mapping details")
     public Result<List<EmployeeMappingVO>> getAllEmployee() {
         List<EmployeeMappingVO> list = employeeService.getAllEmployee();
         return Result.success(list);
@@ -96,7 +96,7 @@ public class CommonController {
      * @return
      */
     @GetMapping("/position")
-    @ApiOperation("Get position mapping details")
+    @Operation(summary = "Get position mapping details")
     public Result<List<PositionMappingVO>> getAllPosition() {
         List<PositionMappingVO> list = positionService.getAllPosition();
         return Result.success(list);
@@ -108,7 +108,7 @@ public class CommonController {
      * @return
      */
     @GetMapping("/department")
-    @ApiOperation("Get department mapping details")
+    @Operation(summary = "Get department mapping details")
     public Result<List<DepartmentMappingVO>> getAllDepartment() {
         List<DepartmentMappingVO> list = departmentService.getAllDepartment();
         return Result.success(list);
@@ -120,7 +120,7 @@ public class CommonController {
      * @return
      */
     @GetMapping("/client")
-    @ApiOperation("Get client mapping details")
+    @Operation(summary = "Get client mapping details")
     public Result<List<ClientMappingVO>> getAllClient() {
         List<ClientMappingVO> list = clientService.getAllClient();
         return Result.success(list);
@@ -132,7 +132,7 @@ public class CommonController {
      * @return
      */
     @GetMapping("/contract")
-    @ApiOperation("Get contract mapping details")
+    @Operation(summary = "Get contract mapping details")
     public Result<List<ContractMappingVO>> getAllContract() {
         List<ContractMappingVO> list = contractService.getAllContract();
         return Result.success(list);

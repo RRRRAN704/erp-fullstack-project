@@ -7,8 +7,8 @@ import com.erp.vo.ContractAmountVO;
 import com.erp.vo.NumberOfContractVO;
 import com.erp.vo.NumberOfOrderVO;
 import com.erp.vo.TopEmployeeVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,7 +20,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("employee/report")
-@Api(tags = "Data visualisation chart")
+@Tag(name = "Data visualisation chart")
 @Slf4j
 public class ReportController {
 
@@ -34,7 +34,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("/contractNumber")
-    @ApiOperation("Number of Contracts Statistics")
+    @Operation(summary = "Number of Contracts Statistics")
     public Result<NumberOfContractVO> contractNumber(
      @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
      @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
@@ -50,7 +50,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("/contractAmount")
-    @ApiOperation("Contract Amount Statistics")
+    @Operation(summary = "Contract Amount Statistics")
     public Result<ContractAmountVO> contractAmount(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
@@ -66,7 +66,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("/orderNumber")
-    @ApiOperation("Order Number Statistics")
+    @Operation(summary = "Order Number Statistics")
     public Result<NumberOfOrderVO> orderNumber(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
@@ -81,7 +81,7 @@ public class ReportController {
      * @return
      */
     @GetMapping("/topEmployee")
-    @ApiOperation("Top Employee Statistics")
+    @Operation(summary = "Top Employee Statistics")
     public Result<TopEmployeeVO> topEmployee(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
