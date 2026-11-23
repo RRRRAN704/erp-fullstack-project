@@ -29,6 +29,7 @@
         <aspectj>1.9.27</aspectj>
         <jjwt>0.13.0</jjwt>
         <testcontainers>1.21.4</testcontainers>
+        <jaxb-runtime>2.3.9</jaxb-runtime>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -100,6 +101,14 @@
                 <groupId>com.aliyun.oss</groupId>
                 <artifactId>aliyun-sdk-oss</artifactId>
                 <version>${aliyun.sdk.oss}</version>
+            </dependency>
+
+            <!-- JAXB (javax.xml.bind) for the OSS SDK, which parses OSS error responses with it.
+                 Removed from the JDK in Java 11; Aliyun's docs say to add it on Java 9+. -->
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>${jaxb-runtime}</version>
             </dependency>
 
 
