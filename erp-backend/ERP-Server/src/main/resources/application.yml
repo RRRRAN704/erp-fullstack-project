@@ -1,5 +1,9 @@
 server:
   port: 8090
+  tomcat:
+    # Tomcat 11 rejects requests whose Accept-Language lists more than 10 locales (default),
+    # which broke every API call from browsers set up with many languages. Keep a cap, just a higher one.
+    max-locale-count: 50
 
 spring:
   profiles:

@@ -18,12 +18,14 @@ code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE_URL/")
 [ "$code" = 200 ] || fail "portal returned HTTP $code"
 echo "ok   portal is served"
 
-# 2. Login issues a token (business result: code 1 = success)
-login=$(curl -s -X POST -H 'Content-Type: application/json' \
+# 2. Login issues a token (business result: code 1 = success).
+#    Sends a long Accept-Language like a browser set up with many languages: Tomcat 11 used to reject it with a 500.
+LANGS='zh-CN,zh;q=0.9,en-GB;q=0.8,en;q=0.8,en-US;q=0.7,zh-TW;q=0.7,ja;q=0.6,ko;q=0.6,fr;q=0.5,de;q=0.5,es;q=0.4,it;q=0.4,pt;q=0.3,ru;q=0.3,nl;q=0.2'
+login=$(curl -s -X POST -H 'Content-Type: application/json' -H "Accept-Language: $LANGS" \
   -d '{"username":"admin","password":"123456"}' "$API/employee/info/login")
 token=$(echo "$login" | jq -r '.data.token // empty' 2>/dev/null || true)
 [ -n "$token" ] || fail "login did not return a token: $login"
-echo "ok   login returns a token"
+echo "ok   login returns a token (with 15 Accept-Language locales)"
 
 # 3. The token is accepted on a protected endpoint
 code=$(curl -s -o /dev/null -w '%{http_code}' -H "token: $token" \
