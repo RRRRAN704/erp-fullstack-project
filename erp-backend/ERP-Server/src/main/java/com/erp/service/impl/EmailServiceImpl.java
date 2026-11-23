@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 @Service
 @Slf4j
@@ -56,7 +56,7 @@ public class EmailServiceImpl implements EmailService {
 
             // 4) store code in Redis with expiry time
             String key = EMAIL_CODE_PREFIX + email;
-            redisTemplate.opsForValue().set(key, code, CODE_EXPIRE_TIME, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set(key, code, Duration.ofMinutes(CODE_EXPIRE_TIME));
             log.info("Brevo SMTP email sent success, email: {}, code: {}", email, code);
             return true;
 

@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 /**
- * API responses are written with our JacksonObjectMapper (registered in WebMvcConfiguration),
- * not Spring Boot's default one: the front end expects dates as "yyyy-MM-dd HH:mm".
+ * API responses use JacksonDateTimeModule (registered in WebMvcConfiguration), not Jackson's
+ * default date format: the front end expects dates as "yyyy-MM-dd HH:mm".
  */
 class JsonFormatTest extends IntegrationTestBase {
 
