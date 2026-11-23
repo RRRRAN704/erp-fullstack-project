@@ -15,4 +15,7 @@ public class MessageConstant {
     public static final String NOT_ADMIN = "Current user is not admin";
     public static final String ADMIN_NO_ACCESS = "Admin does not have access to this resource";
     public static final String MANAGER_ONLY = "Only manager users can access this resource";
+    public static final String DATE_RANGE_REQUIRED = "Start and end dates are required";
+    public static final String DATE_RANGE_REVERSED = "Start date must not be after end date";
+    public static final String DATE_RANGE_TOO_LONG = "Date range must not exceed 366 days";
 }

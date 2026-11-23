@@ -1,9 +1,11 @@
 package com.erp.service.impl;
 
+import com.erp.constant.MessageConstant;
 import com.erp.context.BaseContext;
 import com.erp.dto.ClientDTO;
 import com.erp.dto.ClientPageQueryDTO;
 import com.erp.entity.Client;
+import com.erp.exception.InvalidDateRangeException;
 import com.erp.mapper.ClientMapper;
 import com.erp.mapper.ContractMapper;
 import com.erp.mapper.OrderMapper;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +41,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public NumberOfContractVO getContractNumberStatistics(LocalDate begin, LocalDate end) {
+        checkDateRange(begin, end);
 
         //store each date within a certain period
         List<LocalDate> dateList = new ArrayList<>();
@@ -71,6 +75,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ContractAmountVO getContractAmountStatistics(LocalDate begin, LocalDate end) {
+        checkDateRange(begin, end);
 
         //store each date within a certain period
         List<LocalDate> dateList = new ArrayList<>();
@@ -110,6 +115,7 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public NumberOfOrderVO getOrderNumber(LocalDate begin, LocalDate end) {
+        checkDateRange(begin, end);
 
         //store each date within a certain period
         List<LocalDate> dateList = new ArrayList<>();
@@ -150,6 +156,7 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public TopEmployeeVO getTopEmployee(LocalDate begin, LocalDate end) {
+        checkDateRange(begin, end);
 
 
         LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
@@ -176,5 +183,23 @@ public class ReportServiceImpl implements ReportService {
                 .build();
     }
 
-    }
+    
+    /** Longest range a report may cover: each day in the range costs one database query. */
+    private static final long MAX_RANGE_DAYS = 366;
 
+    /**
+     * Rejects missing, reversed or overly long ranges. The report methods loop day by day
+     * from begin to end, so begin after end used to loop forever.
+     */
+    private static void checkDateRange(LocalDate begin, LocalDate end) {
+        if (begin == null || end == null) {
+            throw new InvalidDateRangeException(MessageConstant.DATE_RANGE_REQUIRED);
+        }
+        if (begin.isAfter(end)) {
+            throw new InvalidDateRangeException(MessageConstant.DATE_RANGE_REVERSED);
+        }
+        if (ChronoUnit.DAYS.between(begin, end) > MAX_RANGE_DAYS) {
+            throw new InvalidDateRangeException(MessageConstant.DATE_RANGE_TOO_LONG);
+        }
+    }
+}
