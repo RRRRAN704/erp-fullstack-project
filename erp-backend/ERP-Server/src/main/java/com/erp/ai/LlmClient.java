@@ -1,9 +1,9 @@
 package com.erp.ai;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +69,7 @@ public class LlmClient {
                 }
                 // Parse response JSON, extract message content field
                 JsonNode j = om.readTree(respBody);
-                return j.at("/choices/0/message/content").asText("{}");
+                return j.at("/choices/0/message/content").asString("{}");
             }
         } catch (Exception e) {
             // Wrap and rethrow as RuntimeException if anything fails

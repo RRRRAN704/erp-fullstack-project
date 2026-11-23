@@ -5,8 +5,8 @@ import com.erp.vo.ContractAmountVO;
 import com.erp.vo.NumberOfContractVO;
 import com.erp.vo.NumberOfOrderVO;
 import com.erp.vo.TopEmployeeVO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -134,7 +134,7 @@ public class AiRouterService {
     // Get a text field safely; if missing or null,  default value
     private static String getTextOr(ObjectNode n, String field, String defVal) {
         return (n != null && n.has(field) && !n.get(field).isNull())
-                ? n.get(field).asText()
+                ? n.get(field).asString()
                 : defVal;
     }
 

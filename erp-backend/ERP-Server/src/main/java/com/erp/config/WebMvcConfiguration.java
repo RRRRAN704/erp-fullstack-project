@@ -1,19 +1,16 @@
 package com.erp.config;
 
 import com.erp.interceptor.JwtTokenAdminInterceptor;
-import com.erp.json.JacksonObjectMapper;
+import com.erp.json.JacksonDateTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
 
 /**
  * Configuration class, register web layer related components.
@@ -57,20 +54,13 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     }
 
 
-    /*Extending the Spring MVC framework's message converter*/
-    //this ensures that all JSON data in the system
-    // follows the custom rules I defined in JacksonObjectMapper, instead of using the default settings.
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        log.info("Extending the message converter...");
-        // Give Spring Boot's own Jackson converter our ObjectMapper, keeping its place in the list.
-        // (Adding a new one at index 0 would put it before the byte[] and String converters,
-        // so e.g. springdoc's byte[] /v3/api-docs response would be written as a base64 string.)
-        for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
-                jacksonConverter.setObjectMapper(new JacksonObjectMapper());
-            }
-        }
+    /**
+     * Date/time formats for JSON request and response bodies ("yyyy-MM-dd HH:mm" etc.).
+     * Spring Boot adds every JacksonModule bean to the JsonMapper behind its message converter.
+     */
+    @Bean
+    public JacksonDateTimeModule jacksonDateTimeModule() {
+        return new JacksonDateTimeModule();
     }
 
 }
