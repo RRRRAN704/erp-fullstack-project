@@ -33,7 +33,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("Register custom interceptor...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
-                .addPathPatterns("/employee/**")
+                .addPathPatterns("/employee/**", "/ai/**")
                 .excludePathPatterns("/employee/info/login")
                 .excludePathPatterns("/employee/info/send-email-code")
                 .excludePathPatterns("/employee/info/reset-password")

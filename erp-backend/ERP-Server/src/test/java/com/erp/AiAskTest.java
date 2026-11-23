@@ -7,7 +7,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * AI assistant: the LLM turns a question into a JSON command, AiRouterService parses it with
@@ -24,7 +26,7 @@ class AiAskTest extends IntegrationTestBase {
         when(llmClient.chatToJson(anyString(), anyString()))
                 .thenReturn("{\"action\":\"contractNumber\",\"from\":\"2025-01-01\",\"to\":\"2026-01-01\"}");
 
-        mockMvc.perform(get("/ai/ask").param("q", "How many contracts in 2025?"))
+        mockMvc.perform(get("/ai/ask").header("token", loginAs("manager")).param("q", "How many contracts in 2025?"))
                 .andExpect(jsonPath("$.code").value(1))
                 .andExpect(jsonPath("$.data.parsed.action").value("contractNumber"))
                 .andExpect(jsonPath("$.data.parsed.from").value("2025-01-01"))
@@ -36,8 +38,16 @@ class AiAskTest extends IntegrationTestBase {
     void invalidLlmOutputFallsBackToDefaults() throws Exception {
         when(llmClient.chatToJson(anyString(), anyString())).thenReturn("not json");
 
-        mockMvc.perform(get("/ai/ask").param("q", "???"))
+        mockMvc.perform(get("/ai/ask").header("token", loginAs("manager")).param("q", "???"))
                 .andExpect(jsonPath("$.code").value(1))
                 .andExpect(jsonPath("$.data.parsed.action").value("unknown"));
+    }
+
+    @Test
+    void requiresLogin() throws Exception {
+        // without this, anyone could use up the LLM quota and read report data
+        mockMvc.perform(get("/ai/ask").param("q", "How many contracts?"))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(llmClient);
     }
 }
