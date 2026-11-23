@@ -5,7 +5,7 @@
 # ---- Build stage ----
 # A jar runs on any CPU, so compile on the builder's native platform (no emulation)
 # even when the final image targets another architecture (e.g. the x86 server from an ARM Mac).
-FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-11 AS build
+FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # Copy the poms first so the dependency layer is reused when only source code changes.
@@ -22,7 +22,7 @@ COPY ERP-Server/src ERP-Server/src
 RUN mvn -B -q package -DskipTests && cp ERP-Server/target/ERP-Server-*.jar app.jar
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Don't run as root inside the container.
