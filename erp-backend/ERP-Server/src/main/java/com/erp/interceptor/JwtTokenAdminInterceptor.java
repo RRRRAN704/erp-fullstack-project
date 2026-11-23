@@ -38,8 +38,6 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     // If the token is valid, the request proceeds; otherwise, it returns 401 Unauthorized.
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        System.out.println("current thread id is " + Thread.currentThread().getId());
-
 
         //to whether the current method a controller method
         if (!(handler instanceof HandlerMethod)) {
@@ -57,14 +55,12 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
 
         //2、check jwt
         try {
-            log.info("jwt check:{}", token);
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
             Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
             String position = claims.get(JwtClaimsConstant.POSITION).toString();
             Long departmentId = Long.valueOf(claims.get(JwtClaimsConstant.DEPARTMENT_ID).toString());
-            log.info("current enployee id：{}", empId);
-            log.info("current enployee position:{}", position);
-            log.info("current enployee departmentId:{}", departmentId);
+            // never log the token itself: anyone reading the logs could reuse it
+            log.debug("Authenticated employee id={}, position={}, departmentId={}", empId, position, departmentId);
             BaseContext.setCurrentId(empId);
             BaseContext.setCurrentRole(position);
             BaseContext.setCurrentDepartment(departmentId);
@@ -75,5 +71,15 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             response.setStatus(401);
             return false;
         }
+    }
+
+    /**
+     * Server threads are reused for later requests, so remove the current user from the
+     * ThreadLocals once this request is finished.
+     */
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) {
+        BaseContext.clear();
     }
 }

@@ -57,7 +57,7 @@ public class EmailServiceImpl implements EmailService {
             // 4) store code in Redis with expiry time
             String key = EMAIL_CODE_PREFIX + email;
             redisTemplate.opsForValue().set(key, code, Duration.ofMinutes(CODE_EXPIRE_TIME));
-            log.info("Brevo SMTP email sent success, email: {}, code: {}", email, code);
+            log.info("Password reset code sent, email: {}", email);
             return true;
 
         } catch (Exception e) {
@@ -80,8 +80,7 @@ public class EmailServiceImpl implements EmailService {
                 return true;
             }
 
-            log.warn("Code verification failed, email: {}, code: {}, saved code: {}",
-                    email, code, savedCode);
+            log.warn("Code verification failed, email: {}", email);
             return false;
 
         } catch (Exception e) {

@@ -15,7 +15,8 @@ public class OssConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AliOssUtil aliOssUtil(AliOssProperties aliOssProperties) {
-        log.info("Create AliOss upload object：{}", aliOssProperties);
+        log.info("Create AliOss upload object, endpoint: {}, bucket: {}",
+                aliOssProperties.getEndpoint(), aliOssProperties.getBucketName());
         return new AliOssUtil(aliOssProperties.getEndpoint(),
                 aliOssProperties.getAccessKeyId(),
                 aliOssProperties.getAccessKeySecret(),

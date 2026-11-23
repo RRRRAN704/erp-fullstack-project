@@ -1,5 +1,6 @@
 package com.erp.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class Employee implements Serializable {
     private String username;
     private Long positionId;
     private Long departmentId;
+    @JsonIgnore // BCrypt hash: never sent to the front end
     private String password;
     private String phone;
     private String sex;

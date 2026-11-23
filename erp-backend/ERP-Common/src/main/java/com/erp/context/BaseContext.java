@@ -47,4 +47,11 @@ public class BaseContext {
         departmentLocal.remove();
     }
 
+    /** Removes the current user's id, role and department (called when a request finishes). */
+    public static void clear() {
+        employeeLocal.remove();
+        roleLocal.remove();
+        departmentLocal.remove();
+    }
+
 }
