@@ -13,10 +13,6 @@ spring:
   main:
     allow-circular-references: true
 
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
-
   # connection pool: HikariCP (Spring Boot's default)
   datasource:
     driver-class-name: ${erp.datasource.driver-class-name}
@@ -43,10 +39,11 @@ spring:
           writetimeout: 5000
 
 
-  redis:
-    host: ${erp.redis.host}
-    port: ${erp.redis.port}
-    password: ${erp.redis.password}
+  data:
+    redis:
+      host: ${erp.redis.host}
+      port: ${erp.redis.port}
+      password: ${erp.redis.password}
 
 
 mybatis:
@@ -57,8 +54,7 @@ mybatis:
     map-underscore-to-camel-case: true
 
 management:
-  # separate port: keeps actuator out of springfox's scan (it fails on Boot 2.6+)
-  # and keeps health checks off the public proxy
+  # separate port: keeps health checks off the public proxy
   server:
     port: 8091
   endpoints:
@@ -98,8 +94,28 @@ erp:
     bucket-name: ${erp.alioss.bucket-name}
 
 
+# API docs: off by default (production); turned on for the dev profile at the end of this file
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+  packages-to-scan: com.erp.controller.employee
+
 llm:
   base-url: ${erp.llm.base-url}
   model: ${erp.llm.model}
   api-key: ${erp.llm.api-key}
   timeout-ms: 12000
+
+---
+# dev profile only: Swagger UI at http://localhost:8090/swagger-ui.html
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

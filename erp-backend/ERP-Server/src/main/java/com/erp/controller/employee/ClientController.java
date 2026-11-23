@@ -12,8 +12,8 @@ import com.erp.result.PageResult;
 import com.erp.result.Result;
 import com.erp.service.ClientService;
 import com.erp.utils.AliOssUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/employee/client")
-@Api(tags = "Client related controller")
+@Tag(name = "Client related controller")
 @Slf4j
 public class ClientController {
 
@@ -40,7 +40,7 @@ public class ClientController {
      */
 
     @PostMapping
-    @ApiOperation("Add Client")
+    @Operation(summary = "Add Client")
     public Result addClient(@RequestBody ClientDTO clientDTO) {
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -60,7 +60,7 @@ public class ClientController {
      * @return
      */
     @PutMapping
-    @ApiOperation("Edit Client")
+    @Operation(summary = "Edit Client")
     public Result editClient(@RequestBody ClientDTO clientDTO) {
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -79,7 +79,7 @@ public class ClientController {
      */
 
     @PutMapping("/archive")
-    @ApiOperation("Archive client in batch")
+    @Operation(summary = "Archive client in batch")
     public Result archiveBatch(@RequestBody List<Long> ids){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -95,7 +95,7 @@ public class ClientController {
      * @return
      */
     @PutMapping("/restore")
-    @ApiOperation("Restore clients in batch")
+    @Operation(summary = "Restore clients in batch")
     public Result restoreBatch(@RequestBody List<Long> ids){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -111,7 +111,7 @@ public class ClientController {
      * @return
      */
     @GetMapping("/page")
-    @ApiOperation("Client page query")
+    @Operation(summary = "Client page query")
     public Result<PageResult> pageClient(ClientPageQueryDTO clientPageQueryDTO){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -129,7 +129,7 @@ public class ClientController {
      * @return
      */
     @GetMapping("/page/archived")
-    @ApiOperation("Archived Client page query")
+    @Operation(summary = "Archived Client page query")
     public Result<PageResult> pageClientArchived (ClientPageQueryDTO clientPageQueryDTO){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);

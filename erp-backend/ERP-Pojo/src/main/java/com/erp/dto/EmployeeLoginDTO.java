@@ -1,8 +1,7 @@
 package com.erp.dto;
 
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,13 +11,13 @@ import java.io.Serializable;
  * employee login info
  */
 @Data
-@ApiModel(description = "data model of login detail")
+@Schema(description = "data model of login detail")
 public class EmployeeLoginDTO implements Serializable {
 
-    @ApiModelProperty("username")
+    @Schema(description = "username")
     private String username;
 
-    @ApiModelProperty("password")
+    @Schema(description = "password")
     private String password;
 
 }

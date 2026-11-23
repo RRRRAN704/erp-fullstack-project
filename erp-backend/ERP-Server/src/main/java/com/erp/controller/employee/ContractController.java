@@ -10,8 +10,8 @@ import com.erp.exception.CannotBeAdminException;
 import com.erp.result.PageResult;
 import com.erp.result.Result;
 import com.erp.service.ContractService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/employee/contract")
-@Api(tags = "Contract related controller")
+@Tag(name = "Contract related controller")
 @Slf4j
 public class ContractController {
 
@@ -35,7 +35,7 @@ public class ContractController {
      */
 
     @PostMapping
-    @ApiOperation("Add Contract")
+    @Operation(summary = "Add Contract")
     public Result addContract(@RequestBody ContractDTO contractDTO) {
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -55,7 +55,7 @@ public class ContractController {
      * @return
      */
     @PutMapping
-    @ApiOperation("Edit Contract")
+    @Operation(summary = "Edit Contract")
     public Result editContract(@RequestBody ContractDTO contractDTO) {
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -74,7 +74,7 @@ public class ContractController {
      */
 
     @PutMapping("/archive")
-    @ApiOperation("Archive contracts in batch")
+    @Operation(summary = "Archive contracts in batch")
     public Result archiveBatch(@RequestBody List<Long> ids){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -90,7 +90,7 @@ public class ContractController {
      * @return
      */
     @PutMapping("/restore")
-    @ApiOperation("Restore contracts in batch")
+    @Operation(summary = "Restore contracts in batch")
     public Result restoreBatch(@RequestBody List<Long> ids){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -106,7 +106,7 @@ public class ContractController {
      * @return
      */
     @GetMapping("/page")
-    @ApiOperation("Contract page query")
+    @Operation(summary = "Contract page query")
     public Result<PageResult> pageClient(ContractPageQueryDTO contractPageQueryDTO){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -123,7 +123,7 @@ public class ContractController {
      * @return
      */
     @GetMapping("/page/archived")
-    @ApiOperation("Archived Contract page query")
+    @Operation(summary = "Archived Contract page query")
     public Result<PageResult> pageArchivedClient(ContractPageQueryDTO contractPageQueryDTO){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);

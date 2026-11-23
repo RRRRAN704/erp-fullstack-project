@@ -10,8 +10,8 @@ import com.erp.exception.NotAdminException;
 import com.erp.result.PageResult;
 import com.erp.result.Result;
 import com.erp.service.OrderService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.jaxb.SpringDataJaxb;
@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/employee/order")
 @Slf4j
-@Api(tags = "Order related api")
+@Tag(name = "Order related api")
 public class OrderController {
 
 
@@ -36,7 +36,7 @@ public class OrderController {
      * @return
      */
     @PostMapping
-    @ApiOperation("generate request from client end")
+    @Operation(summary = "generate request from client end")
     public Result addOrder(@RequestBody AddOrderDTO addOrderDTO) {
         log.info("Add Order: {}", addOrderDTO );
         orderService.addOrder(addOrderDTO);
@@ -50,7 +50,7 @@ public class OrderController {
      * @return
      */
     @PutMapping("/assign")
-    @ApiOperation("Assign order")
+    @Operation(summary = "Assign order")
     public Result assignOrder(@RequestBody ChangeOrderStatusDTO changeOrderStatusDTO) {
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -76,7 +76,7 @@ public class OrderController {
      */
 
     @PutMapping("/archive")
-    @ApiOperation("Archive order in batch")
+    @Operation(summary = "Archive order in batch")
     public Result archiveBatch(@RequestBody List<Long> ids){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -92,7 +92,7 @@ public class OrderController {
      * @return
      */
     @PutMapping("/restore")
-    @ApiOperation("Restore order in batch")
+    @Operation(summary = "Restore order in batch")
     public Result restoreBatch(@RequestBody List<Long> ids){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -108,7 +108,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/page")
-    @ApiOperation("order page query")
+    @Operation(summary = "order page query")
     public Result<PageResult> pageOrder(OrderPageQueryDTO orderPageQueryDTO){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
@@ -124,7 +124,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/page/archived")
-    @ApiOperation("Archived order page query")
+    @Operation(summary = "Archived order page query")
     public Result<PageResult> pageArchivedOrder(OrderPageQueryDTO orderPageQueryDTO){
         if (BaseContext.getCurrentRole().equals("System Admin")) {
             throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);

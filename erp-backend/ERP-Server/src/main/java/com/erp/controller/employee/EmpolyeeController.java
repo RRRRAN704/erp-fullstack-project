@@ -14,20 +14,20 @@ import com.erp.service.EmailService;
 import com.erp.service.EmployeeService;
 import com.erp.utils.JwtUtil;
 import com.erp.vo.EmployeeLoginVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/employee/info")
 @Slf4j
-@Api(tags = "Employee related api")
+@Tag(name = "Employee related api")
 public class EmpolyeeController {
 
 @Autowired
@@ -44,7 +44,7 @@ private EmailService emailService;
 * login function
 * */
     @PostMapping("/login")
-    @ApiOperation(value = "Employee login")
+    @Operation(summary = "Employee login")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO){
         log.info("Employee login");
 
@@ -81,7 +81,7 @@ private EmailService emailService;
      * @return
      */
     @PostMapping("/logout")
-    @ApiOperation("Employee Logout")
+    @Operation(summary = "Employee Logout")
     public Result<String> logout(){
         return Result.success();
     }
@@ -93,7 +93,7 @@ private EmailService emailService;
      * @return
      */
     @PostMapping
-    @ApiOperation("Add new employee")
+    @Operation(summary = "Add new employee")
     public Result saveEmployee(@RequestBody EmployeeDTO employeeDTO){
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -111,7 +111,7 @@ private EmailService emailService;
      * @return
      */
     @GetMapping("/page")
-    @ApiOperation("Employee page query")
+    @Operation(summary = "Employee page query")
     public Result<PageResult> pageEmployee(EmployeePageQueryDTO employeePageQueryDTO){
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -130,7 +130,7 @@ private EmailService emailService;
      * @return
      */
     @PostMapping("/status/{status}")
-    @ApiOperation("Enable or disable employee account")
+    @Operation(summary = "Enable or disable employee account")
     public Result startOrStop(@PathVariable Integer status, Long id) {
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -147,7 +147,7 @@ private EmailService emailService;
      * @return
      */
     @PutMapping
-    @ApiOperation("Edit employee info")
+    @Operation(summary = "Edit employee info")
     public Result update(@RequestBody EmployeeDTO employeeDTO) {
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -164,7 +164,7 @@ private EmailService emailService;
      * @return
      */
     @GetMapping("/{id}")
-    @ApiOperation("Search employee by ID")
+    @Operation(summary = "Search employee by ID")
     public Result<Employee> getById(@PathVariable Long id) {
         if (!BaseContext.getCurrentRole().equals("System Admin")) {
             throw new NotAdminException(MessageConstant.NOT_ADMIN);
@@ -181,7 +181,7 @@ private EmailService emailService;
      * @return
      */
     @PostMapping("/send-email-code")
-    @ApiOperation("send verification code")
+    @Operation(summary = "send verification code")
     public Result<String> sendEmailCode(@Valid @RequestBody SendEmailCodeDTO sendEmailCodeDTO) {
         try {
             // check whether email exist in the database
@@ -211,7 +211,7 @@ private EmailService emailService;
      * @return
      */
     @PostMapping("/reset-password")
-    @ApiOperation("reset password")
+    @Operation(summary = "reset password")
     public Result<String> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
         try {
             // Verify that the new password and confirmation password match

@@ -8,25 +8,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
 /**
- * Configuration class, register web layer related components
+ * Configuration class, register web layer related components.
+ * Implements WebMvcConfigurer (instead of extending WebMvcConfigurationSupport) so that
+ * Spring Boot's MVC auto-configuration stays on: it serves the springdoc Swagger UI resources.
  */
 @Configuration
 @Slf4j
-public class WebMvcConfiguration extends WebMvcConfigurationSupport {
+public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Autowired
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
@@ -36,7 +32,8 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      *
      * @param registry
      */
-    protected void addInterceptors(InterceptorRegistry registry) {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
         log.info("Register custom interceptor...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/employee/**")
@@ -48,39 +45,15 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     }
 
     /**
-     * Generate interface documentation using knife4j
-     * @return
+     * API documentation (springdoc). Served only when springdoc is enabled (dev profile):
+     * Swagger UI at /swagger-ui.html, the OpenAPI JSON at /v3/api-docs.
      */
     @Bean
-    public Docket docket1() {
-        log.info("ERP Project API Documentation");
-        ApiInfo apiInfo = new ApiInfoBuilder()
+    public OpenAPI erpOpenApi() {
+        return new OpenAPI().info(new Info()
                 .title("ERP Project API Documentation")
                 .version("1.0")
-                .description("ERP Project API Documentation")
-                .build();
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
-                .groupName("Mangement Interface")
-                .apiInfo(apiInfo)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.erp.controller.employee"))
-                .paths(PathSelectors.any())
-                .build();
-        return docket;
-    }
-
-    /**
-     * Set static resource mapping
-     * @param registry
-     */
-
-    //When the client requests /doc.html, Spring will serve the file from classpath:/META-INF/resources/.
-    //
-    //When the client requests any path starting with /webjars/,
-    //Spring will look inside classpath:/META-INF/resources/webjars/.
-    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+                .description("ERP Project API Documentation"));
     }
 
 
@@ -88,14 +61,16 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     //this ensures that all JSON data in the system
     // follows the custom rules I defined in JacksonObjectMapper, instead of using the default settings.
     @Override
-    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         log.info("Extending the message converter...");
-        //Create a message converter object
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        //Set up an object converter for the message converter Serialize Java objects to JSON data
-        converter.setObjectMapper(new JacksonObjectMapper());
-        //Add message converter to the container.
-        converters.add(0,converter);
+        // Give Spring Boot's own Jackson converter our ObjectMapper, keeping its place in the list.
+        // (Adding a new one at index 0 would put it before the byte[] and String converters,
+        // so e.g. springdoc's byte[] /v3/api-docs response would be written as a base64 string.)
+        for (HttpMessageConverter<?> converter : converters) {
+            if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
+                jacksonConverter.setObjectMapper(new JacksonObjectMapper());
+            }
+        }
     }
 
 }
