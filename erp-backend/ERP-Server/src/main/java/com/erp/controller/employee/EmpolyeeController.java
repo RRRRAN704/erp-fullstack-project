@@ -6,6 +6,7 @@ import com.erp.constant.MessageConstant;
 import com.erp.context.BaseContext;
 import com.erp.dto.*;
 import com.erp.entity.Employee;
+import com.erp.exception.BaseException;
 import com.erp.exception.NotAdminException;
 import com.erp.properties.JwtProperties;
 import com.erp.result.PageResult;
@@ -199,6 +200,8 @@ private EmailService emailService;
                 return Result.error("Verification code sent failed, please try again later.");
             }
 
+        } catch (BaseException e) {
+            throw e; // e.g. requested again too soon: handled by GlobalExceptionHandler
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error("System error, please try again later.");

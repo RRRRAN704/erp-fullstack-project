@@ -18,4 +18,5 @@ public class MessageConstant {
     public static final String DATE_RANGE_REQUIRED = "Start and end dates are required";
     public static final String DATE_RANGE_REVERSED = "Start date must not be after end date";
     public static final String DATE_RANGE_TOO_LONG = "Date range must not exceed 366 days";
+    public static final String CODE_REQUESTED_TOO_OFTEN = "Please wait a minute before requesting another code";
 }
