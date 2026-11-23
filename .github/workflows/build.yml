@@ -1,4 +1,4 @@
-# CI: run the backend tests, then build both Docker images; on main, push them to GHCR.
+# CI: run the backend tests and an end-to-end smoke test, then build both Docker images; on main, push them to GHCR.
 #   ghcr.io/rrrran704/erp-backend   Spring Boot API        (erp-backend/Dockerfile)
 #   ghcr.io/rrrran704/erp-web       Caddy + both frontends  (deploy/web/Dockerfile)
 # Each image is tagged with the commit SHA (what production runs) and "latest".
@@ -15,6 +15,8 @@ on:
       - "deploy/web/**"
       - ".dockerignore"
       - "deploy/docker-compose.prod.yml"
+      - "deploy/e2e-smoke.sh"
+      - "docker-compose.yml"
       - ".github/workflows/build.yml"
   pull_request:
   workflow_dispatch:
@@ -36,8 +38,26 @@ jobs:
           cache: maven
       - run: mvn -B verify
 
+  # End-to-end: build and start the whole stack from docker-compose.yml (same Dockerfiles and seed data
+  # as production, throwaway database), then log in through Caddy and use the token.
+  # Catches what the tests can't: the test classpath differs from the packaged jar's.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Start the stack
+        run: docker compose up -d --build --wait --wait-timeout 300
+      - name: Smoke test
+        run: ./deploy/e2e-smoke.sh
+      - name: Backend logs on failure
+        if: failure()
+        run: docker compose logs --tail 150 backend web
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v
+
   image:
-    needs: test
+    needs: [test, e2e]
     runs-on: ubuntu-latest
     permissions:
       contents: read
