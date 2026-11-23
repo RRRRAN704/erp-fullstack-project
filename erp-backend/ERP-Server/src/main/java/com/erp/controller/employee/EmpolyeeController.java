@@ -17,7 +17,7 @@ import com.erp.vo.EmployeeLoginVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.map.HashedMap;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +52,7 @@ private EmailService emailService;
 
         String position = employeeService.getPositionById(employee.getPositionId());
 
-        Map<String,Object> claims = new HashedMap<>();
+        Map<String,Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.POSITION,position);
         claims.put(JwtClaimsConstant.EMP_ID,employee.getId());
         claims.put(JwtClaimsConstant.DEPARTMENT_ID,employee.getDepartmentId());

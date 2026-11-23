@@ -17,12 +17,12 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
+  # connection pool: HikariCP (Spring Boot's default)
   datasource:
-    druid:
-      driver-class-name: ${erp.datasource.driver-class-name}
-      url: jdbc:mysql://${erp.datasource.host}:${erp.datasource.port}/${erp.datasource.database}?serverTimezone=Europe/London&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-      username: ${erp.datasource.username}
-      password: ${erp.datasource.password}
+    driver-class-name: ${erp.datasource.driver-class-name}
+    url: jdbc:mysql://${erp.datasource.host}:${erp.datasource.port}/${erp.datasource.database}?serverTimezone=Europe/London&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${erp.datasource.username}
+    password: ${erp.datasource.password}
 
   mail:
     host: ${erp.mail.host}
