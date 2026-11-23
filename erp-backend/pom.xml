@@ -27,7 +27,7 @@
         <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
         <knife4j>3.0.2</knife4j>
         <aspectj>1.9.27</aspectj>
-        <jjwt>0.9.1</jjwt>
+        <jjwt>0.13.0</jjwt>
         <testcontainers>1.21.4</testcontainers>
     </properties>
     <dependencyManagement>
@@ -79,9 +79,20 @@
                 <version>${aspectj}</version>
             </dependency>
 
+            <!-- jjwt: API at compile time, implementation + Jackson serializer at runtime -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt}</version>
             </dependency>
 
