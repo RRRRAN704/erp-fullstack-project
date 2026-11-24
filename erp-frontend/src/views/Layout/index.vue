@@ -1,6 +1,7 @@
 <script setup>
 import Sidebar from '@/views/Layout/components/SideBar.vue'
 import Topbar from '@/views/Layout/components/TopBar.vue'
+import AiAssistant from '@/views/Layout/components/AiAssistant.vue'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useIsMobile } from '@/composables/useIsMobile'
@@ -51,6 +52,8 @@ const MENUS = {
         <RouterView />
       </div>
     </div>
+    <!-- the AI assistant answers business questions, so only in the employee portal -->
+    <AiAssistant v-if="portal === 'employee'" />
   </div>
 </template>
 

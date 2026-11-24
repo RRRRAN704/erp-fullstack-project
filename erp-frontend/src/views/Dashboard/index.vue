@@ -9,7 +9,6 @@ import {
   restoreOrderAPI,
   getAllEmployeeAPI,
 } from "@/apis/order";
-import AiChat from "./components/AiChat.vue";
 import OrderTable from "./components/OrderTable.vue";
 import AssignOrderDialog from "./components/AssignOrderDialog.vue";
 
@@ -123,8 +122,6 @@ const openAssignDialog = (orderId) => {
 
 <template>
   <div class="dashboard-container">
-    <AiChat />
-
     <div class="container">
       <el-tabs v-model="activeName" type="card" class="demo-tabs">
         <el-tab-pane label="Orders" name="first">
