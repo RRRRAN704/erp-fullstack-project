@@ -144,26 +144,27 @@ const deleteDepartment = async (id) => {
         <el-input
           v-model="departmentName"
           placeholder="Please enter name"
-          style="width: 15%"
+          class="search-input"
           clearable
         />
         <el-button class="normal-btn continue" @click="onSearch"
           >Search</el-button
         >
-        <el-button type="primary" style="float: right" @click="openAddDialog">
+        <el-button type="primary"
+              class="add-btn" @click="openAddDialog">
           + Add Department
         </el-button>
       </div>
 
       <el-table :data="departmentList" stripe class="tableBox">
-        <el-table-column prop="departmentName" label="Deparment Name" />
-        <el-table-column label="Last Update Time">
+        <el-table-column min-width="120" prop="departmentName" label="Deparment Name" />
+        <el-table-column min-width="170" label="Last Update Time">
           <template #default="{ row }">
             {{ dayjs(row.updateTime).format("YYYY-MM-DD HH:mm:ss") }}
           </template>
         </el-table-column>
 
-        <el-table-column label="Operation" width="160" align="center">
+        <el-table-column label="Operation" width="160" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
               type="text"

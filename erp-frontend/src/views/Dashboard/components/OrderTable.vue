@@ -16,26 +16,26 @@ const emit = defineEmits(["page-change", "assign", "archive", "restore"]);
 
 <template>
   <el-table :data="rows" stripe class="tableBox">
-    <el-table-column prop="companyName" label="Company Name" />
-    <el-table-column prop="contactPerson" label="Contact Person" />
-    <el-table-column prop="contactEmail" label="Contact Email" />
-    <el-table-column prop="contactPhone" label="Contact Phone" />
-    <el-table-column label="Remark">
+    <el-table-column min-width="120" prop="companyName" label="Company Name" />
+    <el-table-column min-width="120" prop="contactPerson" label="Contact Person" />
+    <el-table-column min-width="180" prop="contactEmail" label="Contact Email" />
+    <el-table-column min-width="120" prop="contactPhone" label="Contact Phone" />
+    <el-table-column min-width="120" label="Remark">
       <template #default="{ row }">
         {{ row.remark ? row.remark : "-" }}
       </template>
     </el-table-column>
-    <el-table-column label="Assigned to">
+    <el-table-column min-width="120" label="Assigned to">
       <template #default="{ row }">
         {{ getEmployeeName(row.employeeId) }}
       </template>
     </el-table-column>
-    <el-table-column label="Last Update Time">
+    <el-table-column min-width="170" label="Last Update Time">
       <template #default="{ row }">
         {{ row.updateTime ? dayjs(row.updateTime).format("YYYY-MM-DD HH:mm:ss") : "-" }}
       </template>
     </el-table-column>
-    <el-table-column label="Operation" width="160" align="center">
+    <el-table-column label="Operation" width="160" align="center" fixed="right">
       <template #default="{ row }">
         <div v-if="!archived" class="operation-buttons">
           <el-button

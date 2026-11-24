@@ -27,39 +27,39 @@ const openFile = (fileUrl) => {
 
 <template>
   <el-table :data="rows" stripe class="tableBox">
-    <el-table-column prop="contractName" label="Contract Name" />
-    <el-table-column prop="contractNumber" label="Contract Number" />
-    <el-table-column label="Client Company Name">
+    <el-table-column min-width="120" prop="contractName" label="Contract Name" />
+    <el-table-column min-width="120" prop="contractNumber" label="Contract Number" />
+    <el-table-column min-width="120" label="Client Company Name">
       <template #default="{ row }">
         {{ getClientCompanyName(row.clientId) }}
       </template>
     </el-table-column>
-    <el-table-column label="Employee">
+    <el-table-column min-width="120" label="Employee">
       <template #default="{ row }">
         {{ getEmployeeName(row.employeeId) }}
       </template>
     </el-table-column>
-    <el-table-column label="Department">
+    <el-table-column min-width="120" label="Department">
       <template #default="{ row }">
         {{ getDepartmentName(row.departmentId) }}
       </template>
     </el-table-column>
-    <el-table-column label="Amount">
+    <el-table-column min-width="120" label="Amount">
       <template #default="{ row }">
         {{ `£${row.amount}` }}
       </template>
     </el-table-column>
-    <el-table-column label="Start Date">
+    <el-table-column min-width="120" label="Start Date">
       <template #default="{ row }">
         {{ dayjs(row.startDate).format("YYYY-MM-DD") }}
       </template>
     </el-table-column>
-    <el-table-column label="End Date">
+    <el-table-column min-width="120" label="End Date">
       <template #default="{ row }">
         {{ dayjs(row.endDate).format("YYYY-MM-DD") }}
       </template>
     </el-table-column>
-    <el-table-column label="File">
+    <el-table-column min-width="120" label="File">
       <template #default="{ row }">
         <el-button
           v-if="row.fileUrl"
@@ -72,12 +72,12 @@ const openFile = (fileUrl) => {
         <span v-else style="color: #909399">No File</span>
       </template>
     </el-table-column>
-    <el-table-column label="Last Update Time">
+    <el-table-column min-width="170" label="Last Update Time">
       <template #default="{ row }">
         {{ dayjs(row.updateTime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
     </el-table-column>
-    <el-table-column label="Operation" width="160" align="center">
+    <el-table-column label="Operation" width="160" align="center" fixed="right">
       <template #default="{ row }">
         <template v-if="!archived">
           <el-button type="text" size="small" class="edit-btn" @click="emit('edit', row)">

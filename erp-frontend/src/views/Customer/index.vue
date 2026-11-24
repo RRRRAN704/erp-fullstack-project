@@ -152,7 +152,7 @@ const openEditDialog = (row) => {
             <label style="margin-right: 5px">Company Name：</label>
             <el-input
               placeholder="Please enter name"
-              style="width: 15%"
+              class="search-input"
               clearable
               v-model="companyName"
             />
@@ -161,7 +161,7 @@ const openEditDialog = (row) => {
             >
             <el-button
               type="primary"
-              style="float: right"
+              class="add-btn"
               @click="openAddDialog"
             >
               + Add Client

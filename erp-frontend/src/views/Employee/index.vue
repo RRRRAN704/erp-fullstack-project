@@ -267,43 +267,44 @@ const handleEnableDisable = async (row) => {
         <el-input
           v-model="employeeName"
           placeholder="Please enter name"
-          style="width: 15%"
+          class="search-input"
           clearable
         />
         <el-button class="normal-btn continue" @click="onSearch">
           Search
         </el-button>
-        <el-button type="primary" style="float: right" @click="openAddDialog">
+        <el-button type="primary"
+              class="add-btn" @click="openAddDialog">
           + Add Employee
         </el-button>
       </div>
 
       <el-table :data="employeeList" stripe class="tableBox">
-        <el-table-column prop="name" label="Full Name" />
-        <el-table-column prop="username" label="Username" />
-        <el-table-column label="Position">
+        <el-table-column min-width="120" prop="name" label="Full Name" />
+        <el-table-column min-width="120" prop="username" label="Username" />
+        <el-table-column min-width="120" label="Position">
           <template #default="{ row }">
             {{ getPositionName(row.positionId) }}
           </template>
         </el-table-column>
-        <el-table-column label="Department">
+        <el-table-column min-width="120" label="Department">
           <template #default="{ row }">
             {{ getDepartmentName(row.departmentId) }}
           </template>
         </el-table-column>
-        <el-table-column prop="phone" label="Phone" />
-        <el-table-column label="Gender">
+        <el-table-column min-width="120" prop="phone" label="Phone" />
+        <el-table-column min-width="120" label="Gender">
           <template #default="{ row }">
             {{ row.sex === "1" ? "Male" : "Female" }}
           </template>
         </el-table-column>
-        <el-table-column prop="email" label="Email" />
-        <el-table-column label="Last Update Time">
+        <el-table-column min-width="180" prop="email" label="Email" />
+        <el-table-column min-width="170" label="Last Update Time">
           <template #default="{ row }">
             {{ dayjs(row.updateTime).format("YYYY-MM-DD HH:mm:ss") }}
           </template>
         </el-table-column>
-        <el-table-column label="Operation" width="160" align="center">
+        <el-table-column label="Operation" width="160" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
               type="text"

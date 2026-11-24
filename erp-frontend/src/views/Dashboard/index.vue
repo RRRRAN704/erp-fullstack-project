@@ -132,7 +132,7 @@ const openAssignDialog = (orderId) => {
             <label style="margin-right: 5px">Company Name：</label>
             <el-input
               placeholder="Please enter name"
-              style="width: 15%"
+              class="search-input"
               clearable
               v-model="companyName"
             />

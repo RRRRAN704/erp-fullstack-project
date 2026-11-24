@@ -17,28 +17,28 @@ const emit = defineEmits(["page-change", "edit", "archive", "restore"]);
 
 <template>
   <el-table :data="rows" stripe class="tableBox">
-    <el-table-column prop="companyName" label="Company Name" />
-    <el-table-column prop="contactPerson" label="Contact Person" />
-    <el-table-column prop="contactPhone" label="Contact Phone" />
-    <el-table-column prop="contactEmail" label="Contact Email" />
-    <el-table-column label="Employee">
+    <el-table-column min-width="120" prop="companyName" label="Company Name" />
+    <el-table-column min-width="120" prop="contactPerson" label="Contact Person" />
+    <el-table-column min-width="120" prop="contactPhone" label="Contact Phone" />
+    <el-table-column min-width="180" prop="contactEmail" label="Contact Email" />
+    <el-table-column min-width="120" label="Employee">
       <template #default="{ row }">
         {{ getEmployeeName(row.employeeId) }}
       </template>
     </el-table-column>
-    <el-table-column label="Department">
+    <el-table-column min-width="120" label="Department">
       <template #default="{ row }">
         {{ getDepartmentName(row.departmentId) }}
       </template>
     </el-table-column>
-    <el-table-column prop="address" label="Address" />
-    <el-table-column prop="remark" label="Remark" />
-    <el-table-column label="Last Update Time">
+    <el-table-column min-width="180" prop="address" label="Address" />
+    <el-table-column min-width="120" prop="remark" label="Remark" />
+    <el-table-column min-width="170" label="Last Update Time">
       <template #default="{ row }">
         {{ dayjs(row.updateTime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
     </el-table-column>
-    <el-table-column label="Operation" width="160" align="center">
+    <el-table-column label="Operation" width="160" align="center" fixed="right">
       <template #default="{ row }">
         <template v-if="!archived">
           <el-button type="text" size="small" class="edit-btn" @click="emit('edit', row)">
