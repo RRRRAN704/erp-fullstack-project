@@ -68,10 +68,10 @@ public class AiAssistantService {
 
             // keep the model's tool request in the conversation (only the fields the API accepts back),
             // then add one result per call
-            ObjectNode request = messages.addObject();
-            request.put("role", "assistant");
-            request.putNull("content");
-            ArrayNode requested = request.putArray("tool_calls");
+            ObjectNode toolRequest = messages.addObject();
+            toolRequest.put("role", "assistant");
+            toolRequest.putNull("content");
+            ArrayNode requested = toolRequest.putArray("tool_calls");
             for (JsonNode call : toolCalls) {
                 ObjectNode copy = requested.addObject();
                 copy.put("id", call.path("id").asString(""));
