@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LayoutEmployee from '@/views/LayoutEmployee/index.vue'
-import LayoutAdmin from '@/views/LayoutAdmin/index.vue'
+import Layout from '@/views/Layout/index.vue'
 import Login from '@/views/Login/index.vue'
 import Reset from '@/views/Reset/index.vue'
 
@@ -33,7 +32,8 @@ const router = createRouter({
     },
     {
       path: '/admin',
-      component: LayoutAdmin,
+      component: Layout,
+      props: { portal: 'admin' },
       children: [
         {
           path: 'employee',
@@ -51,7 +51,8 @@ const router = createRouter({
     },
     {
       path: '/employee',
-      component: LayoutEmployee,
+      component: Layout,
+      props: { portal: 'employee' },
       children: [
         {
           path: 'dashboard',

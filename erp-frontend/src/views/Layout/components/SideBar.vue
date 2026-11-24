@@ -1,7 +1,11 @@
 <script setup>
-import { useRouter, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 
-const router = useRouter();
+// Menu entries for the current portal, given by the layout: { path, icon, label }
+defineProps({
+  items: { type: Array, required: true },
+});
+
 const route = useRoute();
 </script>
 
@@ -11,29 +15,15 @@ const route = useRoute();
       <img src="@/assets/logo.png" alt="Logo" class="logo" />
     </div>
     <ul class="nav-list">
-      <li 
-        class="nav-item" 
-        :class="{ active: route.path === '/admin/employee' }"
-        @click="$router.push('/admin/employee')"
+      <li
+        v-for="item in items"
+        :key="item.path"
+        class="nav-item"
+        :class="{ active: route.path === item.path }"
+        @click="$router.push(item.path)"
       >
-        <i class="iconfont icon-user"></i>
-        <span>Employee Management</span>
-      </li>
-      <li 
-        class="nav-item" 
-        :class="{ active: route.path === '/admin/department' }"
-        @click="$router.push('/admin/department')"
-      >
-        <i class="iconfont icon-department"></i>
-        <span>Department Management</span>
-      </li>
-      <li 
-        class="nav-item" 
-        :class="{ active: route.path === '/admin/position' }"
-        @click="$router.push('/admin/position')"
-      >
-        <i class="iconfont icon-file"></i>
-        <span>Position Management</span>
+        <i :class="['iconfont', item.icon]"></i>
+        <span>{{ item.label }}</span>
       </li>
     </ul>
   </div>
@@ -58,7 +48,7 @@ const route = useRoute();
 }
 
 .logo {
-  width: 120px; 
+  width: 120px;
   height: auto;
   display: inline-block;
 }
@@ -66,7 +56,7 @@ const route = useRoute();
 .nav-list {
   list-style: none;
   padding: 0;
-  margin: 0; 
+  margin: 0;
 }
 
 .nav-item {
