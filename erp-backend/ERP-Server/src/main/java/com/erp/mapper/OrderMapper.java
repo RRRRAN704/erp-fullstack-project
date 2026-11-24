@@ -23,6 +23,14 @@ public interface OrderMapper {
     @AutoFill(value = OperationType.UPDATE)
     void update(Order order);
 
+    /**
+     * get order by id
+     * @param id
+     * @return
+     */
+    @Select("select * from `order` where id = #{id}")
+    Order getById(Long id);
+
 
     /**
      * manager page query

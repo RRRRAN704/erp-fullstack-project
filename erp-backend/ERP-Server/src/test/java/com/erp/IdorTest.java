@@ -170,6 +170,39 @@ class IdorTest extends IntegrationTestBase {
         contractPage(manager, name).andExpect(jsonPath("$.data.records[0].departmentId").value(DEPARTMENT_2));
     }
 
+    // ---------- orders (website leads; manager sees all and assigns, consultant sees own) ----------
+
+    @Test
+    void consultantCannotArchiveOrRestoreOrdersNotAssignedToThem() throws Exception {
+        String manager = loginAs("manager");
+        String company = unique("Idor Order");
+        long id = createWebsiteOrder(manager, company);
+        expect(put("/employee/order/assign", manager, Map.of("id", id, "employeeId", YRWANG_ID)))
+                .andExpect(jsonPath("$.code").value(1));
+        long unassigned = createWebsiteOrder(manager, unique("Idor Unassigned"));
+
+        String adam = loginAs("adam");
+        expectError(put("/employee/order/archive", adam, List.of(id)), NO_PERMISSION);
+        expectError(put("/employee/order/restore", adam, List.of(id)), NO_PERMISSION);
+        expectError(put("/employee/order/archive", adam, List.of(unassigned)), NO_PERMISSION);
+
+        // The assigned consultant still has it, not archived
+        orderPage(loginAs("yrwang"), company).andExpect(jsonPath("$.data.total").value(1));
+        // The manager may archive any order
+        expect(put("/employee/order/archive", manager, List.of(unassigned))).andExpect(jsonPath("$.code").value(1));
+    }
+
+    @Test
+    void managerAssignsOrdersOnlyWithinOwnDepartment() throws Exception {
+        String manager = loginAs("manager");
+        long id = createWebsiteOrder(manager, unique("Idor Assign Order"));
+
+        expectError(put("/employee/order/assign", manager, Map.of("id", id, "employeeId", ADMIN_ID)), CANNOT_ASSIGN);
+        expectError(put("/employee/order/assign", manager, Map.of("id", id, "employeeId", 999_999L)), CANNOT_ASSIGN);
+        expectError(put("/employee/order/assign", manager, Map.of("id", 999_999L, "employeeId", ADAM_ID)),
+                NO_PERMISSION);
+    }
+
     // ---------- helpers ----------
 
     private long createClient(String token, String name, long employeeId) throws Exception {
@@ -221,6 +254,24 @@ class IdorTest extends IntegrationTestBase {
     private ResultActions contractPage(String token, String name) throws Exception {
         return mockMvc.perform(get("/employee/contract/page").header("token", token)
                 .param("page", "1").param("pageSize", "10").param("contractName", name));
+    }
+
+    /** Submits a lead like the public website does (no token) and returns its id from the manager's list. */
+    private long createWebsiteOrder(String managerToken, String company) throws Exception {
+        Map<String, Object> order = new HashMap<>();
+        order.put("companyName", company);
+        order.put("contactPerson", "Visitor");
+        order.put("contactPhone", "07000000001");
+        order.put("contactEmail", "visitor@example.com");
+        mockMvc.perform(MockMvcRequestBuilders.post("/employee/order").contentType(APPLICATION_JSON).content(json(order)))
+                .andExpect(jsonPath("$.code").value(1));
+        String body = orderPage(managerToken, company).andReturn().getResponse().getContentAsString();
+        return ((Number) JsonPath.read(body, "$.data.records[0].id")).longValue();
+    }
+
+    private ResultActions orderPage(String token, String company) throws Exception {
+        return mockMvc.perform(get("/employee/order/page").header("token", token)
+                .param("page", "1").param("pageSize", "10").param("companyName", company));
     }
 
     private RequestBuilder put(String url, String token, Object body) throws Exception {

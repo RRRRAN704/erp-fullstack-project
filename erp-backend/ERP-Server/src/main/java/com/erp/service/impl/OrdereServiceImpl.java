@@ -15,6 +15,10 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.erp.constant.MessageConstant;
+import com.erp.exception.NoAccessException;
+import com.erp.security.AccessGuard;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +30,9 @@ public class OrdereServiceImpl implements OrderService {
 
     @Autowired
     OrderMapper orderMapper;
+
+    @Autowired
+    AccessGuard accessGuard;
 
 //    /**
 //     *archive order/unarchive
@@ -44,7 +51,10 @@ public class OrdereServiceImpl implements OrderService {
      * @param ids
      */
     @Override
+    @Transactional
     public void archiveBatch(List<Long> ids) {
+        // check every id first, so a batch with one foreign id changes nothing
+        ids.forEach(accessGuard::checkOrder);
         for (Long id : ids) {
             Order order = new Order();
             order.setId(id);
@@ -59,7 +69,10 @@ public class OrdereServiceImpl implements OrderService {
      * @param ids
      */
     @Override
+    @Transactional
     public void restoreBatch(List<Long> ids) {
+        // check every id first, so a batch with one foreign id changes nothing
+        ids.forEach(accessGuard::checkOrder);
         for (Long id : ids) {
             Order order = new Order();
             order.setId(id);
@@ -139,6 +152,12 @@ public class OrdereServiceImpl implements OrderService {
      */
     @Override
     public void assignOrder(ChangeOrderStatusDTO changeOrderStatusDTO) {
+        accessGuard.checkOrder(changeOrderStatusDTO.getId());
+        if (changeOrderStatusDTO.getEmployeeId() == null) {
+            throw new NoAccessException(MessageConstant.NO_PERMISSION_ASSIGN);
+        }
+        accessGuard.resolveAssignee(changeOrderStatusDTO.getEmployeeId());
+
         Order order = new Order();
         BeanUtils.copyProperties(changeOrderStatusDTO, order);
         order.setAssignTime(LocalDateTime.now());

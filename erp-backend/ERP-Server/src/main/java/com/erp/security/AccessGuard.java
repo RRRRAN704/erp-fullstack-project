@@ -5,10 +5,12 @@ import com.erp.context.BaseContext;
 import com.erp.entity.Client;
 import com.erp.entity.Contract;
 import com.erp.entity.Employee;
+import com.erp.entity.Order;
 import com.erp.exception.NoAccessException;
 import com.erp.mapper.ClientMapper;
 import com.erp.mapper.ContractMapper;
 import com.erp.mapper.EmployeeMapper;
+import com.erp.mapper.OrderMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -28,11 +30,14 @@ public class AccessGuard {
     private final EmployeeMapper employeeMapper;
     private final ClientMapper clientMapper;
     private final ContractMapper contractMapper;
+    private final OrderMapper orderMapper;
 
-    public AccessGuard(EmployeeMapper employeeMapper, ClientMapper clientMapper, ContractMapper contractMapper) {
+    public AccessGuard(EmployeeMapper employeeMapper, ClientMapper clientMapper,
+                       ContractMapper contractMapper, OrderMapper orderMapper) {
         this.employeeMapper = employeeMapper;
         this.clientMapper = clientMapper;
         this.contractMapper = contractMapper;
+        this.orderMapper = orderMapper;
     }
 
     /**
@@ -70,6 +75,18 @@ public class AccessGuard {
             throw new NoAccessException(MessageConstant.NO_PERMISSION_RECORD);
         }
         return contract;
+    }
+
+    /**
+     * Returns the order if the current user can see it, otherwise throws.
+     * Orders are website leads with no department: managers see all of them, consultants only those assigned to them.
+     */
+    public Order checkOrder(Long orderId) {
+        Order order = orderId == null ? null : orderMapper.getById(orderId);
+        if (order == null || (!isManager() && !Objects.equals(order.getEmployeeId(), BaseContext.getCurrentId()))) {
+            throw new NoAccessException(MessageConstant.NO_PERMISSION_RECORD);
+        }
+        return order;
     }
 
     /** Same visibility as the list pages: manager = own department, consultant = own records. */
