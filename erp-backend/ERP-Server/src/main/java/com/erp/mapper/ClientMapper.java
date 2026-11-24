@@ -50,6 +50,15 @@ public interface ClientMapper {
 
 
     /**
+     * get client by id
+     * @param id
+     * @return
+     */
+    @Select("select * from client where id = #{id}")
+    Client getById(Long id);
+
+
+    /**
      * get client list
      * @return
      */

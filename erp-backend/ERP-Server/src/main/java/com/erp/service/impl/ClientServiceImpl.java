@@ -7,10 +7,12 @@ import com.erp.dto.DepartmentDTO;
 import com.erp.dto.DepartmentPageQueryDTO;
 import com.erp.entity.Client;
 import com.erp.entity.Department;
+import com.erp.entity.Employee;
 import com.erp.entity.Order;
 import com.erp.mapper.ClientMapper;
 import com.erp.mapper.DepartmentMapper;
 import com.erp.result.PageResult;
+import com.erp.security.AccessGuard;
 import com.erp.service.ClientService;
 import com.erp.service.DepartmentService;
 import com.erp.vo.ClientMappingVO;
@@ -19,6 +21,7 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +33,22 @@ public class ClientServiceImpl implements ClientService {
     @Autowired
     ClientMapper clientMapper;
 
+    @Autowired
+    AccessGuard accessGuard;
+
     /**
      * add client
      * @param clientDTO
      */
     @Override
     public void addClient(ClientDTO clientDTO) {
-    Client client = new Client();
-    BeanUtils.copyProperties(clientDTO,client);
-    clientMapper.insert(client);
+        Client client = new Client();
+        BeanUtils.copyProperties(clientDTO,client);
+        client.setId(null);
+        Employee owner = accessGuard.resolveAssignee(clientDTO.getEmployeeId());
+        client.setEmployeeId(owner.getId());
+        client.setDepartmentId(owner.getDepartmentId());
+        clientMapper.insert(client);
     }
 
 
@@ -49,8 +59,16 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void update(ClientDTO clientDTO) {
 
+        accessGuard.checkClient(clientDTO.getId());
+
         Client client = new Client();
         BeanUtils.copyProperties(clientDTO,client);
+        // department is never taken from the request; it follows the (new) employee
+        client.setDepartmentId(null);
+        if (clientDTO.getEmployeeId() != null) {
+            Employee owner = accessGuard.resolveAssignee(clientDTO.getEmployeeId());
+            client.setDepartmentId(owner.getDepartmentId());
+        }
         clientMapper.update(client);
     }
 
@@ -59,7 +77,10 @@ public class ClientServiceImpl implements ClientService {
      * @param ids
      */
     @Override
+    @Transactional
     public void archiveBatch(List<Long> ids) {
+        // check every id first, so a batch with one foreign id changes nothing
+        ids.forEach(accessGuard::checkClient);
             for (Long id : ids) {
                 Client client = new Client();
                 client.setId(id);
@@ -73,7 +94,10 @@ public class ClientServiceImpl implements ClientService {
      * @param ids
      */
     @Override
+    @Transactional
     public void restoreBatch(List<Long> ids) {
+        // check every id first, so a batch with one foreign id changes nothing
+        ids.forEach(accessGuard::checkClient);
         for (Long id : ids) {
             Client client = new Client();
             client.setId(id);
