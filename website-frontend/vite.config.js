@@ -34,9 +34,11 @@ export default defineConfig({
   // The rewrite removes the /api prefix so that /api/employee/list is sent to the backend as /employee/list. 
   // This solves CORS--Cross-Origin Resource Sharing--issues during local development.
   server: {
+    // API_TARGET switches the backend, e.g. the local Docker stack (npm run dev:docker), whose Caddy
+    // serves the API under /api: the prefix is stripped here and added back by the target path.
     proxy: {
       '/api': {
-        target: 'http://localhost:8090',
+        target: process.env.API_TARGET || 'http://localhost:8090',
         changeOrigin: true,
         //get rid of /api in the request
         rewrite: path => path.replace(/^\/api/, '')

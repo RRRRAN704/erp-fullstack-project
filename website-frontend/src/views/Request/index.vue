@@ -256,7 +256,7 @@ const resetForm = () => {
         class="consultation-form-content"
       >
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="Company Name" prop="companyName">
               <el-input
                 v-model="formData.companyName"
@@ -266,7 +266,7 @@ const resetForm = () => {
               />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="Contact Person" prop="contactPerson">
               <el-input
                 v-model="formData.contactPerson"
@@ -279,7 +279,7 @@ const resetForm = () => {
         </el-row>
 
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="Phone Number" prop="contactPhone">
               <el-input
                 v-model="formData.contactPhone"
@@ -289,7 +289,7 @@ const resetForm = () => {
               />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :xs="24" :sm="12">
             <el-form-item label="Email Address" prop="contactEmail">
               <el-input
                 v-model="formData.contactEmail"
@@ -502,7 +502,23 @@ const resetForm = () => {
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
+  /* labels above their fields, so inputs get the full width */
+  .consultation-form-content :deep(.el-form-item) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .consultation-form-content :deep(.el-form-item__label) {
+    width: auto !important;
+    justify-content: flex-start;
+    margin-bottom: 4px;
+  }
+
+  .consultation-form-content :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
+
   .consultation-form {
     margin: 20px auto;
     padding: 12px;
