@@ -51,6 +51,14 @@ public interface ContractMapper {
     Page<Contract> consultantPageQuery(ContractPageQueryDTO contractPageQueryDTO, Long employeeId);
 
     /**
+     * get contract by id
+     * @param id
+     * @return
+     */
+    @Select("select * from contract where id = #{id}")
+    Contract getById(Long id);
+
+    /**
      *get contract id and company name, contract number mapping
      * @return
      */

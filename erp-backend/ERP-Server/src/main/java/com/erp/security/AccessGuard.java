@@ -3,9 +3,11 @@ package com.erp.security;
 import com.erp.constant.MessageConstant;
 import com.erp.context.BaseContext;
 import com.erp.entity.Client;
+import com.erp.entity.Contract;
 import com.erp.entity.Employee;
 import com.erp.exception.NoAccessException;
 import com.erp.mapper.ClientMapper;
+import com.erp.mapper.ContractMapper;
 import com.erp.mapper.EmployeeMapper;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +27,12 @@ public class AccessGuard {
 
     private final EmployeeMapper employeeMapper;
     private final ClientMapper clientMapper;
+    private final ContractMapper contractMapper;
 
-    public AccessGuard(EmployeeMapper employeeMapper, ClientMapper clientMapper) {
+    public AccessGuard(EmployeeMapper employeeMapper, ClientMapper clientMapper, ContractMapper contractMapper) {
         this.employeeMapper = employeeMapper;
         this.clientMapper = clientMapper;
+        this.contractMapper = contractMapper;
     }
 
     /**
@@ -57,6 +61,15 @@ public class AccessGuard {
             throw new NoAccessException(MessageConstant.NO_PERMISSION_RECORD);
         }
         return client;
+    }
+
+    /** Returns the contract if the current user can see it, otherwise throws. */
+    public Contract checkContract(Long contractId) {
+        Contract contract = contractId == null ? null : contractMapper.getById(contractId);
+        if (contract == null || !canSee(contract.getEmployeeId(), contract.getDepartmentId())) {
+            throw new NoAccessException(MessageConstant.NO_PERMISSION_RECORD);
+        }
+        return contract;
     }
 
     /** Same visibility as the list pages: manager = own department, consultant = own records. */

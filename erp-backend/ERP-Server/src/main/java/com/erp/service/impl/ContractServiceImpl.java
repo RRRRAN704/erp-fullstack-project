@@ -5,8 +5,10 @@ import com.erp.dto.ContractDTO;
 import com.erp.dto.ContractPageQueryDTO;
 import com.erp.entity.Client;
 import com.erp.entity.Contract;
+import com.erp.entity.Employee;
 import com.erp.mapper.ContractMapper;
 import com.erp.result.PageResult;
+import com.erp.security.AccessGuard;
 import com.erp.service.ClientService;
 import com.erp.service.ContractService;
 import com.erp.vo.ContractMappingVO;
@@ -15,6 +17,7 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,15 +29,25 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     ContractMapper contractMapper;
+
+    @Autowired
+    AccessGuard accessGuard;
+
     /**
      * add contracts
      * @param contractDTO
      */
     @Override
     public void addContract(ContractDTO contractDTO) {
-     Contract contract = new Contract();
-     BeanUtils.copyProperties(contractDTO,contract);
-     contractMapper.insert(contract);
+        accessGuard.checkClient(contractDTO.getClientId());
+
+        Contract contract = new Contract();
+        BeanUtils.copyProperties(contractDTO,contract);
+        contract.setId(null);
+        Employee owner = accessGuard.resolveAssignee(contractDTO.getEmployeeId());
+        contract.setEmployeeId(owner.getId());
+        contract.setDepartmentId(owner.getDepartmentId());
+        contractMapper.insert(contract);
     }
 
 
@@ -44,8 +57,19 @@ public class ContractServiceImpl implements ContractService {
      */
     @Override
     public void update(ContractDTO contractDTO) {
+        accessGuard.checkContract(contractDTO.getId());
+        if (contractDTO.getClientId() != null) {
+            accessGuard.checkClient(contractDTO.getClientId());
+        }
+
         Contract contract = new Contract();
         BeanUtils.copyProperties(contractDTO,contract);
+        // department is never taken from the request; it follows the (new) employee
+        contract.setDepartmentId(null);
+        if (contractDTO.getEmployeeId() != null) {
+            Employee owner = accessGuard.resolveAssignee(contractDTO.getEmployeeId());
+            contract.setDepartmentId(owner.getDepartmentId());
+        }
         contractMapper.update(contract);
 
     }
@@ -56,7 +80,10 @@ public class ContractServiceImpl implements ContractService {
      * @param ids
      */
     @Override
+    @Transactional
     public void archiveBatch(List<Long> ids) {
+        // check every id first, so a batch with one foreign id changes nothing
+        ids.forEach(accessGuard::checkContract);
         for (Long id : ids) {
             Contract contract = new Contract();
             contract.setId(id);
@@ -72,7 +99,10 @@ public class ContractServiceImpl implements ContractService {
      * @param ids
      */
     @Override
+    @Transactional
     public void restoreBatch(List<Long> ids) {
+        // check every id first, so a batch with one foreign id changes nothing
+        ids.forEach(accessGuard::checkContract);
         for (Long id : ids) {
             Contract contract = new Contract();
             contract.setId(id);
