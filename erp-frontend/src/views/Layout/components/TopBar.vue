@@ -2,6 +2,11 @@
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 
+defineProps({
+  showMenuButton: { type: Boolean, default: false }, // phones: ☰ opens the menu drawer
+});
+const emit = defineEmits(["toggle-menu"]);
+
 const userStore = useUserStore();
 const router = useRouter();
 const confirm = () => {
@@ -16,6 +21,14 @@ const confirm = () => {
 
 <template>
   <div class="topbar">
+    <button
+      v-if="showMenuButton"
+      class="menu-btn"
+      aria-label="Open menu"
+      @click="emit('toggle-menu')"
+    >
+      ☰
+    </button>
     <div class="status">
       <i class="iconfont icon-user"></i>
       <div class="text">{{ userStore.userInfo.name }}</div>
@@ -75,5 +88,32 @@ color: white;
 }
 .logout-btn:hover {
   background-color: #f0f0f0;
+}
+
+.menu-btn {
+  margin-right: auto; /* pushes the user name and logout to the right */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+@media (max-width: 767px) {
+  .topbar {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .status {
+    width: auto;
+    margin-right: 16px;
+  }
+
+  .logout-btn {
+    margin-left: 0;
+  }
 }
 </style>

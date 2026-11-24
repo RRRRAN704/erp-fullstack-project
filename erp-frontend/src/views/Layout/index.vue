@@ -1,11 +1,21 @@
 <script setup>
 import Sidebar from '@/views/Layout/components/SideBar.vue'
 import Topbar from '@/views/Layout/components/TopBar.vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useIsMobile } from '@/composables/useIsMobile'
 
 // One layout for both portals; the router says which one (props: { portal: 'admin' | 'employee' }).
 defineProps({
   portal: { type: String, required: true },
 })
+
+// Phones: the sidebar becomes a drawer opened from the top bar, closed again after navigating.
+const isMobile = useIsMobile()
+const menuOpen = ref(false)
+const route = useRoute()
+watch(() => route.path, () => (menuOpen.value = false))
+watch(isMobile, (mobile) => { if (!mobile) menuOpen.value = false })
 
 const MENUS = {
   admin: [
@@ -24,9 +34,19 @@ const MENUS = {
 
 <template>
   <div class="layout">
-    <Sidebar :items="MENUS[portal]" />
+    <Sidebar v-if="!isMobile" :items="MENUS[portal]" />
+    <el-drawer
+      v-else
+      v-model="menuOpen"
+      direction="ltr"
+      size="200px"
+      :with-header="false"
+      class="menu-drawer"
+    >
+      <Sidebar :items="MENUS[portal]" />
+    </el-drawer>
     <div class="content">
-      <Topbar />
+      <Topbar :show-menu-button="isMobile" @toggle-menu="menuOpen = !menuOpen" />
       <div class="main-body">
         <RouterView />
       </div>
@@ -44,6 +64,7 @@ const MENUS = {
 
 .content {
   flex: 1;
+  min-width: 0; /* let wide tables scroll inside instead of stretching the page */
   display: flex;
   flex-direction: column;
 }
@@ -52,5 +73,17 @@ const MENUS = {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+}
+@media (max-width: 767px) {
+  .main-body {
+    padding: 12px;
+  }
+}
+</style>
+
+<style>
+/* Not scoped: el-drawer is teleported to <body>, outside this component's scoped styles. */
+.menu-drawer .el-drawer__body {
+  padding: 0;
 }
 </style>
