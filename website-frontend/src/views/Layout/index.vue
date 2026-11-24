@@ -1,6 +1,22 @@
 <script setup>
+import { ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useIsMobile } from "@/composables/useIsMobile";
 
+const LINKS = [
+  { to: "/", label: "Home" },
+  { to: "/service", label: "Our Services" },
+  { to: "/request", label: "Request Consultation" },
+];
 
+// Phones: the top menu moves into a drawer opened from the header, closed again after navigating.
+const isMobile = useIsMobile();
+const menuOpen = ref(false);
+const route = useRoute();
+watch(() => route.path, () => (menuOpen.value = false));
+watch(isMobile, (mobile) => {
+  if (!mobile) menuOpen.value = false;
+});
 </script>
 
 
@@ -9,16 +25,38 @@
     <!-- header -->
     <header class="app-header">
       <div class="container">
-       
-        <img src="@/assets/companylogo.png" alt="" />
-       
-        <nav class="nav-menu">
-          <RouterLink to="/" class="nav-item" >Home</RouterLink>
-          <RouterLink to="/service" class="nav-item">Our Services</RouterLink>
-          <RouterLink to="/request" class="nav-item">Request Consultation</RouterLink>
+        <button
+          v-if="isMobile"
+          class="menu-btn"
+          aria-label="Open menu"
+          @click="menuOpen = true"
+        >
+          ☰
+        </button>
+
+        <img src="@/assets/companylogo.png" alt="Ubalance Consulting" />
+
+        <nav v-if="!isMobile" class="nav-menu">
+          <RouterLink v-for="link in LINKS" :key="link.to" :to="link.to" class="nav-item">
+            {{ link.label }}
+          </RouterLink>
         </nav>
       </div>
     </header>
+
+    <el-drawer
+      v-model="menuOpen"
+      direction="ltr"
+      size="240px"
+      :with-header="false"
+      class="site-menu-drawer"
+    >
+      <nav class="drawer-menu">
+        <RouterLink v-for="link in LINKS" :key="link.to" :to="link.to" class="drawer-item">
+          {{ link.label }}
+        </RouterLink>
+      </nav>
+    </el-drawer>
 
     <!-- main content area -->
     <main class="main-content">
@@ -212,24 +250,30 @@
 }
 
 // responsive design
-@media (max-width: 768px) {
+.menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-right: 12px;
+}
+
+/* Phones: a short header with ☰ and the logo; the links live in the drawer */
+@media (max-width: 767px) {
   .layout {
     .app-header {
       .container {
-        flex-direction: column;
-        height: auto;
-        padding: 15px 20px;
-
-        img {
-          margin-bottom: 15px;
-          margin-right: 0;
-        }
+        height: 64px;
+        padding: 0 12px;
       }
 
-      .nav-menu {
-        gap: 20px;
-        flex-wrap: wrap;
-        justify-content: center;
+      img {
+        width: 140px;
+        height: 42px;
+        margin-right: 0;
       }
     }
 
@@ -249,5 +293,34 @@
       }
     }
   }
+}
+</style>
+<style>
+/* Not scoped: el-drawer is teleported to <body>, outside this component's scoped styles. */
+.site-menu-drawer {
+  background-color: #000 !important;
+}
+
+.site-menu-drawer .el-drawer__body {
+  padding: 24px 0;
+}
+
+.site-menu-drawer .drawer-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-menu-drawer .drawer-item {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 14px 24px;
+}
+
+.site-menu-drawer .drawer-item:hover,
+.site-menu-drawer .drawer-item.router-link-exact-active {
+  color: #96e9c9;
+  background-color: rgba(150, 233, 201, 0.1);
 }
 </style>
