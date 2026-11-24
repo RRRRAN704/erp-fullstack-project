@@ -2,6 +2,7 @@ package com.erp.service.impl;
 
 import com.erp.constant.MessageConstant;
 import com.erp.exception.TooManyRequestsException;
+import com.erp.mapper.EmployeeMapper;
 import com.erp.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private EmployeeMapper employeeMapper;
+
     @Value("${erp.mail.from-email}")
     private String fromEmail;
 
@@ -47,6 +51,12 @@ public class EmailServiceImpl implements EmailService {
                 .setIfAbsent(COOLDOWN_PREFIX + email, "1", RESEND_COOLDOWN);
         if (!Boolean.TRUE.equals(firstRequest)) {
             throw new TooManyRequestsException(MessageConstant.CODE_REQUESTED_TOO_OFTEN);
+        }
+        // Unknown email: answer exactly as for a real one (same message, same cooldown) but send nothing,
+        // so the endpoint can't be used to find out which emails belong to employees.
+        if (employeeMapper.selectByEmail(email) == null) {
+            log.info("Password reset requested for an email with no account");
+            return true;
         }
         try {
             // 1. generate codes

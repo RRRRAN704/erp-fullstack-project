@@ -67,13 +67,6 @@ public interface EmployeeService {
 
 
     /**
-     * check if the email exist in the database
-     * @param email
-     * @return
-     */
-    boolean existsByEmail(String email);
-
-    /**
      * reset password
      * @param resetPasswordDTO
      * @return

@@ -174,22 +174,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     /**
-     * whether the current email exixst in the database
-     * @param email
-     * @return
-     */
-    @Override
-    public boolean existsByEmail(String email) {
-        try {
-            Employee employee = employeeMapper.selectByEmail(email);
-            return employee != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
      * reset passoword
      * @param resetPasswordDTO
      * @return

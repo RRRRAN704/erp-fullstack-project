@@ -14,6 +14,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -85,6 +88,26 @@ class PasswordResetTest extends IntegrationTestBase {
         sendCode(email)
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.msg").value("Please wait a minute before requesting another code"));
+    }
+
+    @Test
+    void unknownEmailGetsTheSameAnswerAsAKnownOne() throws Exception {
+        // a different answer ("Cannot find employee") let anyone test which emails belong to employees
+        String known = sendCode("yrwang@example.com").andReturn().getResponse().getContentAsString();
+        String unknown = sendCode("nobody@example.com").andReturn().getResponse().getContentAsString();
+
+        assertThat(unknown).isEqualTo(known);
+        assertThat(codeInRedis("nobody@example.com")).isNull();
+        // the resend cooldown applies too, otherwise it would give the difference away
+        sendCode("nobody@example.com")
+                .andExpect(jsonPath("$.msg").value("Please wait a minute before requesting another code"));
+    }
+
+    @Test
+    void noMailIsSentToAnUnknownEmail() throws Exception {
+        sendCode("stranger@example.com").andExpect(jsonPath("$.code").value(1));
+
+        verify(mailSender, never()).send(any(MimeMessage.class));
     }
 
     private ResultActions sendCode(String email) throws Exception {

@@ -174,17 +174,12 @@ private EmailService emailService;
     @Operation(summary = "send verification code")
     public Result<String> sendEmailCode(@Valid @RequestBody SendEmailCodeDTO sendEmailCodeDTO) {
         try {
-            // check whether email exist in the database
-            boolean exists = employeeService.existsByEmail(sendEmailCodeDTO.getEmail());
-            if (!exists) {
-                return Result.error("Cannot find employee");
-            }
-
-            // send verfication code via email
+            // Same answer whether or not the email belongs to an employee (no account enumeration);
+            // the service only actually sends a code to real employees.
             boolean success = emailService.sendResetPasswordCode(sendEmailCodeDTO.getEmail());
 
             if (success) {
-                return Result.success("The verification code has been sent to your email address. Please check your inbox");
+                return Result.success("If this email belongs to an account, a verification code has been sent. Please check your inbox.");
             } else {
                 return Result.error("Verification code sent failed, please try again later.");
             }
