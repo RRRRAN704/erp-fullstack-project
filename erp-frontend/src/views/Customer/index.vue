@@ -12,7 +12,8 @@ import {
 } from "@/apis/client";
 
 import dayjs from "dayjs";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { assignableEmployees, defaultAssignee } from "@/utils/access";
 import { ElMessage, ElMessageBox } from "element-plus";
 const activeName = ref("first");
 
@@ -22,6 +23,8 @@ const getAllEmployee = async () => {
   const res = await getAllEmployeeAPI();
   employeeList.value = res.data;
 };
+// only the employees you may assign a client to (employeeList stays complete for showing names)
+const assignableEmployeeList = computed(() => assignableEmployees(employeeList.value));
 
 //get all department
 const departmentList = ref([]);
@@ -192,7 +195,7 @@ const resetFormData = () => {
     contactPerson: "",
     contactPhone: "",
     contactEmail: "",
-    employeeId: null,
+    employeeId: defaultAssignee(),
     departmentId: null,
     isArchived: 0, // Default to active
     address: "",
@@ -479,7 +482,7 @@ const cancelForm = () => {
             style="width: 100%"
           >
             <el-option
-              v-for="employee in employeeList"
+              v-for="employee in assignableEmployeeList"
               :key="employee.id"
               :label="employee.name"
               :value="employee.id"

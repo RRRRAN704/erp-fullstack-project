@@ -1,6 +1,7 @@
 <script setup>
 import dayjs from "dayjs";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { assignableEmployees } from "@/utils/access";
 import { ElMessage, ElMessageBox } from "element-plus";
 const activeName = ref("first");
 import { useUserStore } from "@/stores/user";
@@ -53,6 +54,8 @@ const getAllEmployee = async () => {
   const res = await getAllEmployeeAPI();
   employeeList.value = res.data;
 };
+// a manager can assign orders only to employees of their own department
+const assignableEmployeeList = computed(() => assignableEmployees(employeeList.value));
 
 const getEmployeeName = (employeeId) => {
   const employee = employeeList.value.find((emp) => emp.id === employeeId);
@@ -362,7 +365,7 @@ const cancelAssignOrder = () => {
               style="width: 100%"
             >
               <el-option
-                v-for="employee in employeeList"
+                v-for="employee in assignableEmployeeList"
                 :key="employee.id"
                 :label="employee.name"
                 :value="employee.id"

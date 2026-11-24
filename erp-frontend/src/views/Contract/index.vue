@@ -14,7 +14,8 @@ import {
 } from "@/apis/contract";
 
 import dayjs from "dayjs";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { assignableEmployees, visibleClients, defaultAssignee } from "@/utils/access";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const activeName = ref("first");
@@ -25,6 +26,8 @@ const getAllEmployee = async () => {
   const res = await getAllEmployeeAPI();
   employeeList.value = res.data;
 };
+// only the employees you may assign a contract to (employeeList stays complete for showing names)
+const assignableEmployeeList = computed(() => assignableEmployees(employeeList.value));
 
 //get all client
 const clientList = ref([]);
@@ -32,6 +35,8 @@ const getAllClient = async () => {
   const res = await getAllClientAPI();
   clientList.value = res.data;
 };
+// only clients from your own client list can be linked
+const selectableClientList = computed(() => visibleClients(clientList.value));
 
 //get all department
 const departmentList = ref([]);
@@ -231,7 +236,7 @@ const resetFormData = () => {
     contractName: "",
     contractNumber: "",
     clientId: null,
-    employeeId: null,
+    employeeId: defaultAssignee(),
     departmentId: null,
     amount: 0,
     startDate: "",
@@ -585,7 +590,7 @@ const openFile = (fileUrl) => {
             style="width: 100%"
           >
             <el-option
-              v-for="employee in employeeList"
+              v-for="employee in assignableEmployeeList"
               :key="employee.id"
               :label="employee.name"
               :value="employee.id"
@@ -601,7 +606,7 @@ const openFile = (fileUrl) => {
             style="width: 100%"
           >
             <el-option
-              v-for="client in clientList"
+              v-for="client in selectableClientList"
               :key="client.id"
               :label="client.companyName"
               :value="client.id"
