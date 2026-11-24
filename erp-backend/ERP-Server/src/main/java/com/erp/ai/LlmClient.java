@@ -1,14 +1,23 @@
 package com.erp.ai;
 
+import lombok.RequiredArgsConstructor;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import lombok.RequiredArgsConstructor;
-import okhttp3.*;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
+/**
+ * Thin client for an OpenAI-compatible Chat Completions API with tool calling.
+ */
 @Component
 @RequiredArgsConstructor
 public class LlmClient {
@@ -16,64 +25,45 @@ public class LlmClient {
     @Value("${llm.base-url}") private String baseUrl;
     @Value("${llm.model}")    private String model;
     @Value("${llm.api-key}")  private String apiKey;
-    @Value("${llm.timeout-ms:12000}") private int timeoutMs;
+    @Value("${llm.timeout-ms:20000}") private int timeoutMs;
 
-    // For JSON serialization/deserialization
+    private static final MediaType JSON = MediaType.parse("application/json");
+
     private final ObjectMapper om = new ObjectMapper();
-
-    // HTTP client for sending requests
     private final OkHttpClient http = new OkHttpClient();
 
-    /** Make the model strictly return JSON objects (in string form) */
-    public String chatToJson(String system, String user) {
+    /**
+     * Sends the conversation and the tool definitions; returns the model's reply message,
+     * which has either "content" (the answer) or "tool_calls" (tools the model wants us to run).
+     */
+    public JsonNode chat(ArrayNode messages, ArrayNode tools) {
         try {
-            // Build request payload (JSON body)
             ObjectNode root = om.createObjectNode();
-            // specify which LLM model to use
             root.put("model", model);
+            root.set("messages", messages);
+            if (tools != null && !tools.isEmpty()) {
+                root.set("tools", tools);
+            }
 
-
-            // Add system and user messages
-            ArrayNode msgs = root.putArray("messages");
-            msgs.addObject().put("role", "system").put("content", system);
-            msgs.addObject().put("role", "user").put("content", user);
-
-            // Force model to return JSON instead of plain text
-            ObjectNode fmt = root.putObject("response_format");
-            fmt.put("type", "json_object");
-
-
-            // Convert payload to RequestBody
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json"), om.writeValueAsBytes(root));
-
-
-            // Build HTTP client with timeout
-            OkHttpClient client = http.newBuilder()
-                    .callTimeout(java.time.Duration.ofMillis(timeoutMs))
-                    .build();
-
-            // Construct HTTP request with headers and body
+            RequestBody body = RequestBody.create(om.writeValueAsBytes(root), JSON);
+            OkHttpClient client = http.newBuilder().callTimeout(Duration.ofMillis(timeoutMs)).build();
             Request req = new Request.Builder()
                     .url(baseUrl + "/chat/completions")
                     .addHeader("Authorization", "Bearer " + apiKey)
                     .post(body)
                     .build();
 
-            // Execute the request synchronously
             try (Response resp = client.newCall(req).execute()) {
                 String respBody = resp.body() != null ? resp.body().string() : "";
                 if (!resp.isSuccessful()) {
-                    // If API returns error code, throw exception with details
                     throw new RuntimeException("LLM HTTP " + resp.code() + " - " + respBody);
                 }
-                // Parse response JSON, extract message content field
-                JsonNode j = om.readTree(respBody);
-                return j.at("/choices/0/message/content").asString("{}");
+                return om.readTree(respBody).at("/choices/0/message");
             }
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            // Wrap and rethrow as RuntimeException if anything fails
-            throw new RuntimeException("LLM API calls failure", e);
+            throw new RuntimeException("LLM API call failed", e);
         }
     }
 }

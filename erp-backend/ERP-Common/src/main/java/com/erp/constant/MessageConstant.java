@@ -20,6 +20,7 @@ public class MessageConstant {
     public static final String DATE_RANGE_TOO_LONG = "Date range must not exceed 366 days";
     public static final String NO_PERMISSION_RECORD = "No permission to modify this record";
     public static final String NO_PERMISSION_ASSIGN = "No permission to assign to this employee";
+    public static final String AI_QUESTION_REQUIRED = "Please enter a question";
     public static final String AI_UNAVAILABLE = "The AI assistant is temporarily unavailable. Please try again later.";
     public static final String CODE_REQUESTED_TOO_OFTEN = "Please wait a minute before requesting another code";
 }

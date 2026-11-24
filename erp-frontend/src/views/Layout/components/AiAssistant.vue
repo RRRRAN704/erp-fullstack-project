@@ -1,17 +1,20 @@
 <script setup>
 import { nextTick, ref, watch } from "vue";
-import { getAiResponse } from "@/apis/ai";
+import { chatAPI } from "@/apis/ai";
 import { useUserStore } from "@/stores/user";
 
 // AI assistant: a floating button on every employee page that opens a fixed-size chat panel.
 // Messages scroll inside the panel, so the page itself never grows.
 
 const SUGGESTIONS = [
-  "How many contracts did we sign last month?",
-  "What was the total contract value this year?",
-  "How many consultation orders came in this week?",
-  "Who were the top 5 employees last month?",
+  "How many contracts did we sign last month, and what were they worth?",
+  "Compare this month's contract value with last month's",
+  "List my clients and their contact people",
+  "Who were the top 5 employees this year?",
 ];
+
+// how many earlier messages go with each question, so follow-ups ("and last month?") work
+const HISTORY_SIZE = 10;
 
 const userStore = useUserStore();
 // History survives a page refresh (sessionStorage = this browser tab only), kept per user
@@ -42,13 +45,19 @@ const send = async (text = input.value) => {
   const question = text.trim();
   if (!question || thinking.value) return;
 
+  // earlier turns for context, without error bubbles
+  const history = messages.value
+    .filter((m) => !m.error)
+    .slice(-HISTORY_SIZE)
+    .map((m) => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content }));
+
   messages.value.push({ role: "user", content: question });
   input.value = "";
   thinking.value = true;
   scrollToBottom();
 
   try {
-    const res = await getAiResponse(question);
+    const res = await chatAPI(question, history);
     // code 0 = business error with a readable message (e.g. the AI service is unavailable)
     if (res.code === 1) {
       messages.value.push({ role: "ai", content: res.data?.text || "Sorry, I couldn't understand that." });
@@ -80,7 +89,7 @@ const clearChat = () => {
     <header class="ai-header">
       <div>
         <div class="ai-title">AI Assistant</div>
-        <div class="ai-subtitle">Ask about contracts, orders and top employees</div>
+        <div class="ai-subtitle">Ask about contracts, clients, orders and top employees</div>
       </div>
       <div class="ai-header-actions">
         <button class="ai-icon-btn" title="Clear chat" :disabled="!messages.length" @click="clearChat">

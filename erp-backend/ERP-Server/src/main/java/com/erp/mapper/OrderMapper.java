@@ -8,6 +8,8 @@ import com.erp.enumeration.OperationType;
 import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -30,6 +32,13 @@ public interface OrderMapper {
      */
     @Select("select * from `order` where id = #{id}")
     Order getById(Long id);
+
+    /**
+     * active website orders no one has been assigned yet (newest first)
+     * @return
+     */
+    @Select("select * from `order` where employee_id is null and is_archived = 0 order by create_time desc")
+    List<Order> getUnassigned();
 
 
     /**
