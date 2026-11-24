@@ -168,35 +168,25 @@ const toggleTabs = (index) => {
   font-weight: 500;
 }
 
-@media (max-width: 768px) {
+/* Phones: tabs in one row that scrolls sideways, the date range below */
+@media (max-width: 767px) {
   .title-index {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
+    gap: 12px;
+    padding: 12px;
   }
-  
-  .tabs {
-    flex-direction: column;
+
+  .month {
+    overflow-x: auto;
   }
-  
+
   .li-tab {
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
+    flex: none;
+    padding: 10px 14px;
+    white-space: nowrap;
   }
-  
-  .li-tab:last-child {
-    border-bottom: none;
-  }
-  
-  .title-index {
-    padding: 16px;
-  }
-  
-  .li-tab {
-    padding: 14px 16px;
-    font-size: 15px;
-  }
-  
+
   .get-time {
     white-space: normal;
   }

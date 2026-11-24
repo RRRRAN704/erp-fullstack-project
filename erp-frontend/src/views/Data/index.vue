@@ -225,4 +225,15 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+
+/* Phones: one chart per row */
+@media (max-width: 767px) {
+  .dashboard-container {
+    padding: 0;
+  }
+
+  .grid-row {
+    flex-direction: column;
+  }
+}
 </style>

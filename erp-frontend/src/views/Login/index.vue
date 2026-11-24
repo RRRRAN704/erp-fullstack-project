@@ -67,7 +67,7 @@ const doLogin = () => {
         <div class="brandName">FlowBit ERP</div>
         <div class="account-box">
           <div class="form">
-            <el-form ref="formRef" :model="form" :rules="rules">
+            <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
               <el-form-item label="Username">
                 <el-input v-model="form.username" />
               </el-form-item>
@@ -96,24 +96,24 @@ const doLogin = () => {
 .login {
   display: flex;
   justify-content: center;
-  margin: 0;
-  padding: 0;
   align-items: center;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  padding: 16px;
   background-color: #333;
 }
 
+/* Desktop: photo on the left, form on the right */
 .login-box {
   width: 60%;
-  height: 60%;
+  max-width: 960px;
+  min-height: 60vh;
   border-radius: 8px;
   display: flex;
   overflow: hidden;
 
   img {
     width: 60%;
-    height: auto;
+    object-fit: cover;
   }
 }
 
@@ -121,51 +121,59 @@ const doLogin = () => {
   background: #ffffff;
   width: 40%;
   padding: 40px 30px;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  position: relative;
 
   .brandName {
+    text-align: center;
     font-size: 20px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     color: #002b5b;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   }
 
-  .account-box {
+  .form {
     width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
-    .form {
-      width: 100%;
-      height: 80%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-
-      .el-form-item {
-        margin-bottom: 20px;
-      }
-
-      .subBtn {
-        width: 100%;
-        background-color: #002b5b;
-        color: #ffffff;
-      }
-
-      .rstBtn {
-        width: 100%;
-        background-color: #f0f0f0;
-        color: #333;
-      }
+    .el-form-item {
+      margin-bottom: 20px;
     }
+
+    .subBtn {
+      width: 100%;
+      background-color: #002b5b;
+      color: #ffffff;
+    }
+
+    .rstBtn {
+      width: 100%;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+  }
+}
+
+/* Phones: one card across the screen, photo as a banner on top */
+@media (max-width: 767px) {
+  .login-box {
+    width: 100%;
+    max-width: 400px;
+    min-height: 0;
+    flex-direction: column;
+
+    /* photo becomes a banner above the form, cropped rather than squashed */
+    img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+  }
+
+  .login-form {
+    width: 100%;
+    padding: 32px 24px;
   }
 }
 </style>

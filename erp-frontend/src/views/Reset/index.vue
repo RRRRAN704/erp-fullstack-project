@@ -225,8 +225,7 @@ const resetPassword = () => {
   margin: 0;
   padding: 0;
   align-items: center;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
   background-color: #333;
 }
 
@@ -297,6 +296,33 @@ const resetPassword = () => {
         color: #333;
       }
     }
+  }
+}
+
+/* Phones: one card across the screen, illustration as a banner on top */
+@media (max-width: 767px) {
+  .login {
+    padding: 16px;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 400px;
+    flex-direction: column;
+
+    /* illustration becomes a banner above the form, shown whole (not cropped);
+       the sides are filled with the illustration's own background colour */
+    img {
+      width: 100%;
+      height: 150px;
+      object-fit: contain;
+      background-color: #10232e;
+    }
+  }
+
+  .login-form {
+    width: 100%;
+    padding: 32px 24px;
   }
 }
 </style>
