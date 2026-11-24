@@ -1,13 +1,12 @@
 package com.erp.controller.employee;
 
+import com.erp.annotation.RequireRole;
+import com.erp.enumeration.Role;
 
 import com.erp.constant.JwtClaimsConstant;
-import com.erp.constant.MessageConstant;
-import com.erp.context.BaseContext;
 import com.erp.dto.*;
 import com.erp.entity.Employee;
 import com.erp.exception.BaseException;
-import com.erp.exception.NotAdminException;
 import com.erp.properties.JwtProperties;
 import com.erp.result.PageResult;
 import com.erp.result.Result;
@@ -95,10 +94,8 @@ private EmailService emailService;
      */
     @PostMapping
     @Operation(summary = "Add new employee")
+    @RequireRole(Role.ADMIN)
     public Result saveEmployee(@RequestBody EmployeeDTO employeeDTO){
-        if (!BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new NotAdminException(MessageConstant.NOT_ADMIN);
-        }
         log.info("Add new employee: {}", employeeDTO);
         employeeService.saveEmployee(employeeDTO);
         return Result.success();
@@ -113,10 +110,8 @@ private EmailService emailService;
      */
     @GetMapping("/page")
     @Operation(summary = "Employee page query")
+    @RequireRole(Role.ADMIN)
     public Result<PageResult> pageEmployee(EmployeePageQueryDTO employeePageQueryDTO){
-        if (!BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new NotAdminException(MessageConstant.NOT_ADMIN);
-        }
         log.info("Employee page query: {}", employeePageQueryDTO);
         PageResult pageResult = employeeService.employeePageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
@@ -132,10 +127,8 @@ private EmailService emailService;
      */
     @PostMapping("/status/{status}")
     @Operation(summary = "Enable or disable employee account")
+    @RequireRole(Role.ADMIN)
     public Result startOrStop(@PathVariable Integer status, Long id) {
-        if (!BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new NotAdminException(MessageConstant.NOT_ADMIN);
-        }
         log.info("Enable or disable employee account: {},{}", status, id);
         employeeService.startOrStop(status,id);
         return Result.success();
@@ -149,10 +142,8 @@ private EmailService emailService;
      */
     @PutMapping
     @Operation(summary = "Edit employee info")
+    @RequireRole(Role.ADMIN)
     public Result update(@RequestBody EmployeeDTO employeeDTO) {
-        if (!BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new NotAdminException(MessageConstant.NOT_ADMIN);
-        }
         log.info("Edit employee info{}", employeeDTO);
         employeeService.update(employeeDTO);
         return Result.success();
@@ -166,10 +157,8 @@ private EmailService emailService;
      */
     @GetMapping("/{id}")
     @Operation(summary = "Search employee by ID")
+    @RequireRole(Role.ADMIN)
     public Result<Employee> getById(@PathVariable Long id) {
-        if (!BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new NotAdminException(MessageConstant.NOT_ADMIN);
-        }
         Employee employee = employeeService.getById(id);
         return Result.success(employee);
     }

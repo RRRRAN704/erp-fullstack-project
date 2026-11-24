@@ -1,12 +1,9 @@
 package com.erp.controller.employee;
 
+import com.erp.annotation.RequireRole;
+import com.erp.enumeration.Role;
 
-import com.erp.constant.MessageConstant;
-import com.erp.context.BaseContext;
 import com.erp.dto.*;
-import com.erp.exception.CannotBeAdminException;
-import com.erp.exception.NoAccessException;
-import com.erp.exception.NotAdminException;
 import com.erp.result.PageResult;
 import com.erp.result.Result;
 import com.erp.service.OrderService;
@@ -51,17 +48,8 @@ public class OrderController {
      */
     @PutMapping("/assign")
     @Operation(summary = "Assign order")
+    @RequireRole(Role.MANAGER)
     public Result assignOrder(@RequestBody ChangeOrderStatusDTO changeOrderStatusDTO) {
-        if (BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
-        }
-
-
-       if (!BaseContext.getCurrentRole().equals("Manager")){
-         throw new NoAccessException(MessageConstant.MANAGER_ONLY);
-       }
-
-
         log.info("Assign order: {}", changeOrderStatusDTO );
         orderService.assignOrder(changeOrderStatusDTO);
         return Result.success();
@@ -77,10 +65,8 @@ public class OrderController {
 
     @PutMapping("/archive")
     @Operation(summary = "Archive order in batch")
+    @RequireRole(Role.STAFF)
     public Result archiveBatch(@RequestBody List<Long> ids){
-        if (BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
-        }
         orderService.archiveBatch(ids);
         return Result.success();
     }
@@ -93,10 +79,8 @@ public class OrderController {
      */
     @PutMapping("/restore")
     @Operation(summary = "Restore order in batch")
+    @RequireRole(Role.STAFF)
     public Result restoreBatch(@RequestBody List<Long> ids){
-        if (BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
-        }
         orderService.restoreBatch(ids);
         return Result.success();
     }
@@ -109,10 +93,8 @@ public class OrderController {
      */
     @GetMapping("/page")
     @Operation(summary = "order page query")
+    @RequireRole(Role.STAFF)
     public Result<PageResult> pageOrder(OrderPageQueryDTO orderPageQueryDTO){
-        if (BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
-        }
         log.info("Order page query {}", orderPageQueryDTO);
         PageResult pageResult = orderService.orderPageQurey(orderPageQueryDTO);
         return Result.success(pageResult);
@@ -125,10 +107,8 @@ public class OrderController {
      */
     @GetMapping("/page/archived")
     @Operation(summary = "Archived order page query")
+    @RequireRole(Role.STAFF)
     public Result<PageResult> pageArchivedOrder(OrderPageQueryDTO orderPageQueryDTO){
-        if (BaseContext.getCurrentRole().equals("System Admin")) {
-            throw new CannotBeAdminException(MessageConstant.ADMIN_NO_ACCESS);
-        }
         log.info("Order page query {}", orderPageQueryDTO);
         PageResult pageResult = orderService.orderArchivedPageQurey(orderPageQueryDTO);
         return Result.success(pageResult);

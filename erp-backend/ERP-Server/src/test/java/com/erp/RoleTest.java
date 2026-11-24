@@ -76,7 +76,7 @@ class RoleTest extends IntegrationTestBase {
     @ParameterizedTest(name = "assign as {0}")
     @CsvSource({
             "yrwang, " + MANAGER_ONLY,
-            "admin, " + ADMIN_NO_ACCESS})
+            "admin, " + MANAGER_ONLY})
     void onlyManagersAssignOrders(String user, String message) throws Exception {
         expectRejected(user, "PUT", "/employee/order/assign", "{\"id\":999999,\"employeeId\":2}", message);
     }
