@@ -5,15 +5,18 @@ import com.erp.context.BaseContext;
 import com.erp.dto.AiChatDTO;
 import com.erp.entity.Employee;
 import com.erp.exception.AiUnavailableException;
+import com.erp.exception.TooManyRequestsException;
 import com.erp.mapper.EmployeeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -32,6 +35,10 @@ public class AiAssistantService {
     static final int MAX_HISTORY_TURNS = 10;
     static final int MAX_TEXT_LENGTH = 1000;
 
+    /** Each question costs money (several model calls), so each user gets a budget per minute. */
+    static final int MAX_QUESTIONS_PER_MINUTE = 10;
+    private static final String RATE_PREFIX = "ai:rate:";
+
     static final String TOO_MANY_STEPS =
             "Sorry, that question needed too many steps. Please try asking it in a simpler way.";
 
@@ -41,9 +48,12 @@ public class AiAssistantService {
     private final LlmClient llm;
     private final AiTools tools;
     private final EmployeeMapper employeeMapper;
+    private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper om = new ObjectMapper();
 
     public String chat(AiChatDTO request) {
+        checkRateLimit();
+
         ArrayNode messages = om.createArrayNode();
         messages.addObject().put("role", "system").put("content", systemPrompt());
 
@@ -91,6 +101,23 @@ public class AiAssistantService {
             }
         }
         return TOO_MANY_STEPS;
+    }
+
+    /**
+     * Counts this user's questions in Redis; the counter expires a minute after the first one
+     * (a fixed one-minute window), and over the limit the question is refused before any model call.
+     */
+    private void checkRateLimit() {
+        String key = RATE_PREFIX + BaseContext.getCurrentId();
+        Long count = redisTemplate.opsForValue().increment(key);
+        Long ttl = redisTemplate.getExpire(key);
+        if (count != null && (count == 1 || ttl == null || ttl < 0)) {
+            // also repairs a counter that somehow lost its expiry, so nobody is locked out for good
+            redisTemplate.expire(key, Duration.ofMinutes(1));
+        }
+        if (count != null && count > MAX_QUESTIONS_PER_MINUTE) {
+            throw new TooManyRequestsException(MessageConstant.AI_TOO_MANY_QUESTIONS);
+        }
     }
 
     private JsonNode callModel(ArrayNode messages, ArrayNode toolDefinitions) {

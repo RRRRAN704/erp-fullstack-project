@@ -1,7 +1,10 @@
 package com.erp;
 
 import com.erp.ai.LlmClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -36,6 +39,17 @@ class AiAssistantTest extends IntegrationTestBase {
 
     @MockitoBean
     LlmClient llmClient;
+
+    @Autowired
+    RedisTemplate<String, String> redisTemplate;
+
+    /** Every test starts with a fresh per-user question count (seed users: yrwang 2, manager 3, adam 6). */
+    @BeforeEach
+    void resetRateLimits() {
+        for (long id : new long[]{2, 3, 6}) {
+            redisTemplate.delete("ai:rate:" + id);
+        }
+    }
 
     /** Snapshot of the messages sent on each call (the service keeps appending to the same array). */
     private final List<ArrayNode> sent = new ArrayList<>();
@@ -164,6 +178,23 @@ class AiAssistantTest extends IntegrationTestBase {
                 .andExpect(jsonPath("$.data.text").value(org.hamcrest.Matchers.startsWith("Sorry, that question needed too many steps")));
 
         verify(llmClient, times(5)).chat(any(), any());
+    }
+
+    @Test
+    void questionsPerUserAreLimitedPerMinute() throws Exception {
+        // each question costs money; a script (or a shared demo account) must not drain the credit
+        modelReplies(answer("ok"));
+        for (int i = 0; i < 10; i++) {
+            ask("yrwang", "Question " + i, List.of()).andExpect(jsonPath("$.code").value(1));
+        }
+
+        ask("yrwang", "One too many", List.of())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.msg").value("You're asking too quickly. Please wait a minute and try again."));
+        verify(llmClient, times(10)).chat(any(), any());
+
+        // the limit is per user: someone else can still ask
+        ask("manager", "Hello", List.of()).andExpect(jsonPath("$.code").value(1));
     }
 
     @Test
