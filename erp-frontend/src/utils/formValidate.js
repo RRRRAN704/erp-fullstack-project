@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 // formate data function
 export const formatDate = () => {
     const now = new Date();
@@ -14,129 +16,36 @@ export const formatDate = () => {
   };
   
 
-  // format a given date into a custom string format (e.g. "YYYY-mm-dd")
-  function dateFormat(fmt, time) {
-    let date = new Date(time);
-    let ret;
-    
-    // format options
-    const opt = {
-      // year
-      "Y+": date.getFullYear().toString(),
-      // month (0-based, so +1)
-      "m+": (date.getMonth() + 1).toString(),
-      // day
-      "d+": date.getDate().toString()
-      
-    };
-    
-    // loop through format options and replace in format string
-    for (const k in opt) {
-      ret = new RegExp("(" + k + ")").exec(fmt);
-      if (ret) {
-        fmt = fmt.replace(
-          ret[1],
-          ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, "0")
-        );
-      }
-    }
-    return fmt;
-  }
-  
- 
+  // Date ranges for the report tabs, as "YYYY-MM-DD" strings for the API.
+  // Built with dayjs from calendar dates. The old code parsed new Date().toLocaleDateString(), which gives
+  // "24/11/2026" in en-GB browsers: JavaScript can't parse that, so every range became NaN.
+  const DAY_FORMAT = "YYYY-MM-DD";
+  const range = (start, end) => [start.format(DAY_FORMAT), end.format(DAY_FORMAT)];
+  const today = () => dayjs().startOf("day");
+
+  // yesterday only
   export const get1stAndToday = () => {
-   
-    let toData = new Date(new Date().toLocaleDateString()).getTime();
-  
-    let yesterdayStart = toData - 3600 * 24 * 1000;
-
-    let yesterdayEnd = yesterdayStart + 24 * 60 * 60 * 1000 - 1;
-    
-
-    let startDay1 = dateFormat("YYYY-mm-dd", yesterdayStart);
-    let endDay1 = dateFormat("YYYY-mm-dd", yesterdayEnd);
-    
-    return [startDay1, endDay1];
+    const yesterday = today().subtract(1, "day");
+    return range(yesterday, yesterday);
   };
 
+  // yesterday and today, as "YYYY.MM.DD"
   export const getday = () => {
-
-    let toData = new Date(new Date().toLocaleDateString()).getTime();
- 
-    let yesterdays = toData - 3600 * 24 * 1000;
-    
-   
-    let yesterday = dateFormat("YYYY.mm.dd", yesterdays);
-    let today = dateFormat("YYYY.mm.dd", toData);
-    
-    return [yesterday, today];
+    const t = today();
+    return [t.subtract(1, "day").format("YYYY.MM.DD"), t.format("YYYY.MM.DD")];
   };
-  
 
-  export const past7Day = () => {
+  // the 7 days before today
+  export const past7Day = () => range(today().subtract(7, "day"), today().subtract(1, "day"));
 
-    let toData = new Date(new Date().toLocaleDateString()).getTime();
-  
-    let past7daysStart = toData - 7 * 3600 * 24 * 1000;
-   
-    let past7daysEnd = toData - 1;
-    
+  // the 30 days before today
+  export const past30Day = () => range(today().subtract(30, "day"), today().subtract(1, "day"));
 
-    let days7Start = dateFormat("YYYY-mm-dd", past7daysStart);
-    let days7End = dateFormat("YYYY-mm-dd", past7daysEnd);
-    
-    return [days7Start, days7End];
-  };
-  
-
-  export const past30Day = () => {
-
-    let toData = new Date(new Date().toLocaleDateString()).getTime();
-
-    let past30daysStart = toData - 30 * 3600 * 24 * 1000;
- 
-    let past30daysEnd = toData - 1;
-    
-
-    let days30Start = dateFormat("YYYY-mm-dd", past30daysStart);
-    let days30End = dateFormat("YYYY-mm-dd", past30daysEnd);
-    
-    return [days30Start, days30End];
-  };
-  
-
+  // this week, Monday to Sunday (dayjs counts Sunday as day 0, so Sunday is 6 days after Monday)
   export const pastWeek = () => {
-  
-    let toData = new Date(new Date().toLocaleDateString()).getTime();
-   
-    var nowDayOfWeek = new Date().getDay();
-    
-  
-    const weekStartData = toData - (nowDayOfWeek - 1) * 24 * 60 * 60 * 1000;
-   
-    const weekEndData = toData + (7 - nowDayOfWeek) * 24 * 60 * 60 * 1000;
-    
+    const monday = today().subtract((today().day() + 6) % 7, "day");
+    return range(monday, monday.add(6, "day"));
+  };
 
-    let weekStart = dateFormat("YYYY-mm-dd", weekStartData);
-    let weekEnd = dateFormat("YYYY-mm-dd", weekEndData);
-    
-    return [weekStart, weekEnd];
-  };
-  
- 
-  export const pastMonth = () => {
-  
-    let year = new Date().getFullYear();
-    let month = new Date().getMonth();
-    
-    
-    const monthStartData = new Date(year, month, 1).getTime();
-    
-    const monthEndData = new Date(year, month + 1, 0).getTime() + 24 * 60 * 60 * 1000 - 1;
-    
- 
-    let monthStart = dateFormat("YYYY-mm-dd", monthStartData);
-    let monthEnd = dateFormat("YYYY-mm-dd", monthEndData);
-    
-    return [monthStart, monthEnd];
-  };
+  // this month, 1st to last day
+  export const pastMonth = () => range(today().startOf("month"), today().endOf("month"));
