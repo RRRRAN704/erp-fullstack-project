@@ -1,132 +1,125 @@
-## Online Demo
-    
-http://13.62.187.151/   public-facing company website
-    
-http://13.62.187.151/admin/  ERP management system
+# FlowBit ERP
 
----
+A full-stack ERP system for a consulting company: a public website where prospective clients request a consultation, and an internal ERP where managers assign those leads to consultants and the team manages clients, contracts, reports and an AI query assistant.
 
-## System Overview
+Started as my MSc dissertation project, then rebuilt for production: containerised, deployed by CI/CD, covered by integration tests, upgraded to Java 21 / Spring Boot 4 and security-hardened.
 
-This ERP system is a full-stack management platform designed for consulting-style companies.
+[![Build](https://github.com/RRRRAN704/erp-fullstack-project/actions/workflows/build.yml/badge.svg)](https://github.com/RRRRAN704/erp-fullstack-project/actions/workflows/build.yml)
+![Java 21](https://img.shields.io/badge/Java%2021-Spring%20Boot%204.2-6DB33F)
+![Vue 3](https://img.shields.io/badge/Vue%203-Vite%20%7C%20Element%20Plus-42B883)
+![MySQL](https://img.shields.io/badge/MySQL%208-Redis%207-4479A1)
 
-It provides **two separate user interfaces**: an **Admin Portal** for system management and an **Employee Portal** for daily business operations.
+**Live:** company website <https://flowbiterp.site> · ERP portal <https://erp.flowbiterp.site>
 
----
+## Highlights
 
-## Admin Portal
+- **Security hardening backed by attack tests:** record-level access checks against IDOR (you can only change what you can see, assign only within your reach, and the department is derived server-side), role rules declared with a `@RequireRole` annotation enforced by an aspect, brute-force-resistant password reset codes, no secrets or codes in logs. Every fix started with a test that showed the attack working.
+- **CI/CD with no long-lived cloud credentials:** GitHub Actions runs the tests and an end-to-end smoke test, builds images to GHCR, then deploys through GitHub OIDC → an AWS IAM role → SSM Run Command. The deploy waits for health checks and rolls back automatically. SSH is closed.
+- **Four containers on a 1 GB t3.micro:** Caddy (HTTPS for both sites), Spring Boot, MySQL and Redis, each with a memory limit and tuned settings, images built in CI rather than on the server.
+- **Stepwise upgrade from Java 11 / Spring Boot 2.7 to Java 21 / Spring Boot 4.2:** via Boot 3.5 (`javax` → `jakarta`, springfox → springdoc, jjwt 0.9 → 0.13, Jackson 3), each step merged only with green tests and deployed separately.
+- **79 integration tests** run the whole application against real MySQL and Redis in Docker (Testcontainers), from login and business flows to IDOR and role checks.
 
-### Employee Management
+## Features
 
-- Manage employee accounts, including creating, editing, enabling, and disabling users.
-- Supports paginated employee lists, fuzzy search by name, and role-based access control.
-- New employees are created with a default password and required to reset it via email.
+**Public website** (`website-frontend`)
+- Company pages and a consultation form; submissions arrive in the ERP as unassigned orders
 
-### Department Management
+**ERP: admin portal**
+- Employees: create, edit, enable/disable accounts (new employees set their password via an emailed code)
+- Departments and positions
 
-- Create, edit, search, and delete departments.
-- Departments are centrally managed and used as references across the system.
+**ERP: employee portal** (managers and consultants)
+- **Orders:** managers see every website lead and assign it to a consultant in their department; consultants see the orders assigned to them; archive and restore
+- **Clients and contracts:** consultants work on their own records, managers on their whole department; contract PDFs uploaded to object storage
+- **Reports:** contracts signed, contract value, orders received and top 5 employees over a chosen date range (ECharts)
+- **AI assistant:** questions in plain English ("how many contracts did we sign last month?") are routed by an LLM to a fixed set of report queries, so it answers from real data and cannot run arbitrary SQL
+- Password reset by email code
 
-### Position Management
+## Architecture
 
-- Manage job positions and associate them with existing departments.
-- Supports full CRUD operations with department validation.
+```mermaid
+flowchart LR
+    U[Browser] -->|HTTPS| C
 
----
+    subgraph EC2["AWS EC2 t3.micro · Docker Compose"]
+        C["Caddy<br/>flowbiterp.site → website<br/>erp.flowbiterp.site → ERP<br/>/api/* → backend"]
+        B["Spring Boot 4.2<br/>Java 21"]
+        M[(MySQL 8)]
+        R[(Redis 7)]
+        C --> B
+        B --> M
+        B --> R
+    end
 
-## Employee Portal
+    B --> O[Aliyun OSS<br/>contract files]
+    B --> L[LLM API<br/>AI assistant]
+    B --> E[SMTP<br/>reset codes]
+```
 
-### Order Dashboard
+```mermaid
+flowchart LR
+    P[git push to main] --> T[Integration tests<br/>Testcontainers]
+    P --> E2E[E2E smoke test<br/>full stack in Docker]
+    T --> I[Build images<br/>push to GHCR]
+    E2E --> I
+    I --> D["Deploy<br/>OIDC → IAM role → SSM"]
+    D --> H{Healthy?}
+    H -->|yes| S[Smoke test production]
+    H -->|no| RB[Roll back to previous images]
+```
 
-- Displays consultation orders submitted through the company website.
-- Managers can assign orders to consultants; employees can view only their assigned orders.
-- Supports pagination, fuzzy search, and order archiving/restoration.
+## Tech stack
 
-### Contract Management
+| Area | Technology |
+|---|---|
+| Backend | Java 21, Spring Boot 4.2, Spring MVC, MyBatis + PageHelper, JWT (jjwt), Spring AOP, Bean Validation, springdoc (dev only) |
+| Data | MySQL 8 (HikariCP), Redis 7 (reset codes and rate limits) |
+| Frontend | Vue 3, Vite, Element Plus, Pinia, ECharts, Axios |
+| Integrations | Aliyun OSS (file uploads), OpenAI-compatible LLM API, SMTP |
+| Testing | JUnit 5, MockMvc, Testcontainers (MySQL, Redis), shell end-to-end smoke test |
+| Infrastructure | Docker, Docker Compose, Caddy (automatic HTTPS), GitHub Actions, GHCR, AWS EC2 + IAM OIDC + SSM |
 
-- Manage customer contracts with role-based visibility.
-- Supports creating, editing, archiving, and restoring contracts, including PDF attachment uploads.
-- Managers can view contracts within their department, while employees see only their own.
+## Problems I solved
 
-### Customer Management
+**A removed dependency broke production login, and the tests didn't notice.** While upgrading, I removed `jaxb-api` because nothing imported it. But the old JWT library called `javax.xml.bind.DatatypeConverter` at runtime, so login returned HTTP 500 in production for about an hour. The tests passed because `spring-boot-starter-test` puts a JAXB API on the *test* classpath only. I fixed it by moving to jjwt 0.13, then closed the gap: a CI job now starts the real images through Caddy and logs in, and I checked that it fails on the broken commit. Checking the rest of the dependency tree found a second victim: the Aliyun OSS SDK parses error responses with JAXB, now covered by its own test.
 
-- Maintain customer records linked to employees and departments.
-- Supports CRUD operations, fuzzy search, and customer archiving.
-- Access is restricted based on user roles and responsibilities.
+**Login failed only in my desktop browser.** After the Spring Boot 4.2 upgrade every API call from my desktop Chrome returned 500, while curl, CI and my phone worked. Tomcat 11 rejects requests whose `Accept-Language` header lists more than 10 locales, and that browser was configured with more. The fix was one property (`server.tomcat.max-locale-count`); the end-to-end test now logs in with a 15-locale header so it can't come back.
 
+**Running four containers in 1 GB of RAM.** The first attempt hung the server when memory ran out. I added swap, moved image builds to CI, measured each container at idle and set limits from the measurements (MySQL 320 MB with a 64 MB buffer pool and performance schema off, the JVM sized by `MaxRAMPercentage` inside a 448 MB limit, Redis 48 MB, Caddy 64 MB).
 
-### Data Visualization
+**Tests exposed security holes.** Writing integration tests showed that any logged-in user could edit, archive or reassign another user's clients, contracts and orders just by sending their ids (IDOR), and that a reversed date range sent the report endpoint into an infinite loop. For each issue I first wrote a test that performed the attack successfully, then fixed the code until the test passed.
 
-- Interactive dashboards displaying key business metrics, including:
-    
-    Number of signed contracts within a selected time range
-    
-    Total contract value within a selected time range
-    
-    Number of consultation orders received
-    
-    Top 5 employees by contract value
+## Running locally
 
-### AI-Powered Query Assistant
+Requires Docker.
 
-- Integrated AI chatbot that allows users to query predefined business metrics.
-- Supports natural-language queries related to contracts, orders, and employee performance.
-- Powered by the OpenAI API with controlled query scope.
+```bash
+docker compose up --build
+```
 
-In addition, the system integrates with a public-facing company website where potential clients can submit consultation requests. These requests are automatically synchronised into the ERP system as orders, enabling managers to review, assign, and track them within the internal workflow.
+- Website: <http://localhost:8080>
+- ERP: <http://localhost:8081> (seed accounts `admin`, `manager`, `yrwang` with password `123456`, local only)
 
----
+Email, file upload and the AI assistant need real credentials in a git-ignored `.env` (names in `deploy/.env.example`); everything else works without them. `docker compose down -v` resets the database to the seed data.
 
-## Key Features
+Backend tests (JDK 21 and Docker):
 
-- **Role-Based Access Control (RBAC)**
-    
-    The system enforces role-based permissions, separating administrator, manager, and employee responsibilities to ensure secure and structured access to data.
-    
-- **Dual-Portal Architecture**
-    
-    Designed with separate Admin and Employee portals, enabling clear separation between system management and daily business operations.
-    
-- **End-to-End Order Lifecycle Management**
-    
-    Consultation orders are created via the company website, assigned by managers, tracked by employees, and archived upon completion.
-    
-- **Department-Aware Data Visibility**
-    
-    Contracts and customers are displayed based on departmental ownership, ensuring managers can oversee their teams while employees access only relevant records.
-    
-- **Interactive Data Visualization Dashboard**
-    
-    Business metrics such as contract volume, revenue trends, and top-performing employees are visualized using dynamic charts.
-    
-- **AI-Powered Business Query Assistant**
-    
-    An integrated AI chat interface allows users to query predefined business metrics using natural language, backed by the OpenAI API.
-    
----
+```bash
+cd erp-backend
+mvn -pl ERP-Server -am verify
+```
 
-## Deployment Guide
+## Project structure
 
-This project is deployed on an AWS EC2 instance using Nginx as a reverse proxy for the Spring Boot backend and static front-end assets.
-
-### Requirements
-
-- Linux server (e.g. Ubuntu)
-- Java (JDK 11)
-- MySQL
-- Redis
-- Nginx
-
-### Build & Run
-
-- Build the backend with Maven and run the generated JAR.
-- Build the front-end projects and serve the generated `dist` files via Nginx.
-- Configure Nginx to proxy API requests to the backend service.
-
-### Configuration
-
-Application configuration is managed via `application.yml`.
-
-A **sanitised configuration file** is included in this repository for reference.
-
-Actual credentials and environment-specific values should be provided via local configuration or environment variables.
+```
+erp-backend/            Spring Boot, Maven multi-module
+  ERP-Common/           constants, exceptions, JWT and other utilities, configuration properties
+  ERP-Pojo/             entities, DTOs, VOs
+  ERP-Server/           controllers, services, MyBatis mappers, security (AccessGuard, @RequireRole), AI assistant
+  erp_project.sql       schema and seed data
+erp-frontend/           ERP admin and employee portals (Vue 3)
+website-frontend/       public company website (Vue 3)
+deploy/                 production compose file, Caddy web image, end-to-end smoke test
+.github/workflows/      CI/CD pipeline
+docker-compose.yml      full stack for local development
+```
