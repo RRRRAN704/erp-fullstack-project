@@ -1,5 +1,8 @@
 package com.erp.ai;
 
+import com.erp.constant.MessageConstant;
+import com.erp.exception.AiUnavailableException;
+import com.erp.exception.InvalidDateRangeException;
 import com.erp.service.ReportService;
 import com.erp.vo.ContractAmountVO;
 import com.erp.vo.NumberOfContractVO;
@@ -8,14 +11,17 @@ import com.erp.vo.TopEmployeeVO;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AiRouterService {
@@ -25,17 +31,27 @@ public class AiRouterService {
     private final ReportService reportService;
     private final ObjectMapper om = new ObjectMapper();
 
-    // Default date range: [today-7d, tomorrow) — i.e., 7-day half-open interval
-    private static LocalDate[] defaultRange() {
-        LocalDate to = LocalDate.now().plusDays(1);
-        LocalDate from = to.minusDays(7);
-        return new LocalDate[]{from, to};
+    // Dates are UK dates, whatever time zone the server runs in
+    private static final ZoneId UK = ZoneId.of("Europe/London");
+
+    // Default date range: the last 7 days up to and including today (both ends included)
+    private static LocalDate[] defaultRange(LocalDate today) {
+        return new LocalDate[]{today.minusDays(6), today};
     }
 
     public Map<String, Object> ask(String question) {
 
+        LocalDate today = LocalDate.now(UK);
+
         // 1) Ask the LLM to output a strict JSON command (action/from/to/…)
-        String json = llm.chatToJson(Prompts.NL2JSON, question);
+        String json;
+        try {
+            json = llm.chatToJson(Prompts.nl2Json(today), question);
+        } catch (RuntimeException e) {
+            // out of credit, timeout, outage...: a clear message instead of HTTP 500
+            log.warn("AI assistant: LLM call failed: {}", e.getMessage());
+            throw new AiUnavailableException(MessageConstant.AI_UNAVAILABLE);
+        }
 
         // 2) Parse the JSON safely; if parsing fails, fall back to an empty JSON object
         ObjectNode cmd;
@@ -49,12 +65,12 @@ public class AiRouterService {
         // 3) Autofill missing fields with sensible defaults
         String action = getTextOr(cmd, "action", "unknown");
 
-        LocalDate[] def = defaultRange();
+        LocalDate[] def = defaultRange(today);
         LocalDate from = parseDateOr(cmd, "from", def[0]);
         LocalDate to   = parseDateOr(cmd, "to",   def[1]);
 
-        // Ensure a valid half-open interval [from, to); if invalid, reset to defaults
-        if (!from.isBefore(to)) {
+        // Both ends are included; a reversed range falls back to the default
+        if (from.isAfter(to)) {
             from = def[0];
             to   = def[1];
         }
@@ -71,12 +87,23 @@ public class AiRouterService {
 
 
         // 5) Route based on 'action' and call domain services to get real data
+        try {
+            route(action, from, to, out);
+        } catch (InvalidDateRangeException e) {
+            // e.g. "since 2020": the reports cover at most 366 days at a time
+            out.put("text", "I can only look at up to 366 days at a time. Please ask about a shorter period.");
+            out.put("data", new LinkedHashMap<String, Object>());
+        }
+        return out;
+    }
+
+    private void route(String action, LocalDate from, LocalDate to, Map<String, Object> out) {
         switch (action) {
             case "contractNumber": {
                 NumberOfContractVO vo = reportService.getContractNumberStatistics(from, to);
                 int total = sumCsvInt(vo.getNumberOfContractList());
                 out.put("text", String.format("from %s to %s, number of contracts: %d",
-                        from, to.minusDays(1), total));
+                        from, to, total));
                 out.put("data", vo);
                 break;
             }
@@ -84,7 +111,7 @@ public class AiRouterService {
                 ContractAmountVO vo = reportService.getContractAmountStatistics(from, to);
                 BigDecimal total = sumCsvBig(vo.getContractAmountList());
                 out.put("text", String.format("from %s to %s, contract amounts: GBP %s",
-                        from, to.minusDays(1), total.toPlainString()));
+                        from, to, total.toPlainString()));
                 out.put("data", vo);
                 break;
             }
@@ -92,7 +119,7 @@ public class AiRouterService {
                 NumberOfOrderVO vo = reportService.getOrderNumber(from, to);
                 int total = sumCsvInt(vo.getOrderNumberList());
                 out.put("text", String.format("from %s to %s, number of consultation orders: %d",
-                        from, to.minusDays(1), total));
+                        from, to, total));
                 out.put("data", vo);
                 break;
             }
@@ -126,7 +153,6 @@ public class AiRouterService {
                 break;
             }
         }
-        return out;
     }
 
     // ========== Tool Methods: Safe Value Retrieval/Parsing ==========

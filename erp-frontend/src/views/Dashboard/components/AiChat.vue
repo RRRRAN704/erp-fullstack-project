@@ -18,7 +18,11 @@ const sendMessage = async () => {
 
   try {
     const res = await getAiResponse(userInput.value);
-    const aiText = res.data.text || "AI cannot understand your request";
+    // code 0 = business error with a readable message (e.g. the AI service is unavailable)
+    const aiText =
+      res.code === 1
+        ? res.data?.text || "AI cannot understand your request"
+        : res.msg || "Failed to call AI interface. Please try again later.";
     messages.value.push({ role: "ai", content: aiText });
   } catch (error) {
     console.error("AI call failed:", error);
