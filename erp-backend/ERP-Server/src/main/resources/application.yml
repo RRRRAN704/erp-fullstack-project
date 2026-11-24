@@ -75,7 +75,8 @@ logging:
   level:
     com:
       erp:
-        mapper: debug
+        # SQL with parameters (emails, names...) is logged only in the dev profile below, never in production
+        mapper: info
         service: info
         controller: info
 
@@ -118,6 +119,11 @@ spring:
   config:
     activate:
       on-profile: dev
+logging:
+  level:
+    com:
+      erp:
+        mapper: debug
 springdoc:
   api-docs:
     enabled: true
